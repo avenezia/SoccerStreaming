@@ -10,22 +10,22 @@
 
 namespace network
 {
-	class CurlHttpHandler : public HttpHandler
-	{
-		public:
-			explicit CurlHttpHandler(const std::string& hostnameUrl);
-			virtual ~CurlHttpHandler();
+    class CurlHttpHandler : public HttpHandler
+    {
+        public:
+            explicit CurlHttpHandler(const std::string& hostnameUrl);
+            virtual ~CurlHttpHandler();
 
-			virtual short handleGet(const std::string& requestUri, 
-				const std::vector<std::pair<std::string, std::string>>& headerList,
-				std::string& httpResponseBody);		
-			virtual short handleGet(const std::string& requestUri, 
-				std::string& httpResponseBody);
+            virtual short handleGet(const std::string& requestUri, 
+                const std::vector<std::pair<std::string, std::string>>& headerList,
+                std::string& httpResponseBody);     
+            virtual short handleGet(const std::string& requestUri, 
+                std::string& httpResponseBody);
 
-		private:
-			std::string hostnameUrl_;
-			curlpp::Easy requestHandler_;
-	};
+        private:
+            std::string hostnameUrl_;
+            curlpp::Easy requestHandler_;
+    };
 }
 
 #endif
