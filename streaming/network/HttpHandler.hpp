@@ -13,10 +13,10 @@ namespace network
             explicit HttpHandler(const std::string& hostnameUrl) {};
             virtual ~HttpHandler() {};
             
-            virtual short handleGet(const std::string& requestUri,
+            virtual short getRequest(const std::string& requestUri,
                 const std::vector<std::pair<std::string, std::string>>& headerList,
                 std::string& httpResponseBody) = 0;
-            virtual short handleGet(const std::string& requestUri,
+            virtual short getRequest(const std::string& requestUri,
                 std::string& httpResponseBody) = 0;
     };
 }

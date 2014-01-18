@@ -16,10 +16,10 @@ namespace network
             explicit CurlHttpHandler(const std::string& hostnameUrl);
             virtual ~CurlHttpHandler();
 
-            virtual short handleGet(const std::string& requestUri, 
+            virtual short getRequest(const std::string& requestUri, 
                 const std::vector<std::pair<std::string, std::string>>& headers,
                 std::string& httpResponseBody);     
-            virtual short handleGet(const std::string& requestUri, 
+            virtual short getRequest(const std::string& requestUri, 
                 std::string& httpResponseBody);
 
         private:

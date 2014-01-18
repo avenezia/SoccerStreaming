@@ -25,7 +25,7 @@ namespace network
 
     }
 
-    short CurlHttpHandler::handleGet(const std::string& requestUri, 
+    short CurlHttpHandler::getRequest(const std::string& requestUri, 
         const std::vector<std::pair<std::string, std::string>>& headers,
         std::string& httpResponseBody)
     {
@@ -47,11 +47,11 @@ namespace network
         return curlpp::infos::ResponseCode::get(requestHandler_);
     }
 
-    short CurlHttpHandler::handleGet(const std::string& requestUri, 
+    short CurlHttpHandler::getRequest(const std::string& requestUri, 
         std::string& httpResponseBody)
     {
         std::vector<std::pair<std::string, std::string>> v;
-        handleGet(requestUri, v, httpResponseBody);
+        getRequest(requestUri, v, httpResponseBody);
     }
 }
 
