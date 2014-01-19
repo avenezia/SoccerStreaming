@@ -51,7 +51,7 @@ namespace network
         std::string& httpResponseBody)
     {
         std::vector<std::pair<std::string, std::string>> v;
-        getRequest(requestUri, v, httpResponseBody);
+        return getRequest(requestUri, v, httpResponseBody);
     }
 }
 
