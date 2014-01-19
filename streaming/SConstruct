@@ -1,0 +1,6 @@
+env = Environment()
+env.Append(CPPFLAGS = ["-std=c++0x", "-Wall"])
+env.Append(CPPPATH = ["./network", "./website", "/usr/local/include/"])
+
+SConscript("network/SConscript", variant_dir = "build/network", duplicate = 0)
+SConscript("website/SConscript", variant_dir = "build/website", duplicate = 0)
