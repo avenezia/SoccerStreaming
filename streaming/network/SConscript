@@ -1,3 +1,5 @@
 env = Environment()
 env.Append(CPPFLAGS = ["-std=c++0x", "-Wall"])
+env.Object(source = "HttpResponse.cpp")
 env.Object(source = "CurlHttpHandler.cpp")
+

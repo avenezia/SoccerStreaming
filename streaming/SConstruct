@@ -1,6 +1,21 @@
+from os import listdir
+
+networkFolder = "network/"
+websiteFolder = "website/"
+buildFolder = "build/"
+
+objectFolders = [buildFolder + networkFolder, buildFolder + websiteFolder]
+
 env = Environment()
 env.Append(CPPFLAGS = ["-std=c++0x", "-Wall"])
-env.Append(CPPPATH = ["./network", "./website", "/usr/local/include/"])
+#env.Append(CPPPATH = [networkFolder, websiteFolder, "/usr/local/include/"])
+env.Append(CPPPATH = ["/usr/local/include/"])
 
-SConscript("network/SConscript", variant_dir = "build/network", duplicate = 0)
-SConscript("website/SConscript", variant_dir = "build/website", duplicate = 0)
+a = SConscript(networkFolder + "SConscript", variant_dir = buildFolder + networkFolder, duplicate = 0)
+SConscript(websiteFolder + "SConscript", variant_dir = buildFolder + websiteFolder, duplicate = 0)
+
+objects = []
+for folder in objectFolders:
+    objects.extend([ folder + object for object in listdir(folder) ])     
+
+env.Program("main.cpp", objects)

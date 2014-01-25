@@ -1,7 +1,6 @@
 #ifndef STREAMING_HANDLER_HPP
 #define STREAMING_HANDLER_HPP
 
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -9,18 +8,16 @@ namespace network{ class HttpHandler; }
 
 namespace website
 {
-	class StreamingHandler
-	{
-		public:
-			StreamingHandler(const std::string& hostName);
-			virtual ~StreamingHandler();
+	class StreamingInfo;
 
-			virtual std::vector<std::string> getStreamingLinks(const std::string& teamName) = 0;
+    class StreamingHandler
+    {
+        public:
+            StreamingHandler();
+            virtual ~StreamingHandler();
 
-		private:
-			std::unique_ptr<network::HttpHandler> httpHandler_;
-
-	};
+            virtual std::vector<StreamingInfo> getStreamingLinks(const std::string& teamName) = 0;
+    };
 }
 
 #endif

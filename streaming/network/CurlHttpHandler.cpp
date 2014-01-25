@@ -1,4 +1,5 @@
 #include "CurlHttpHandler.hpp"
+#include "HttpResponse.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -25,15 +26,15 @@ namespace network
 
     }
 
-    short CurlHttpHandler::getRequest(const std::string& requestUri, 
-        const std::vector<std::pair<std::string, std::string>>& headers,
-        std::string& httpResponseBody)
+    HttpResponse CurlHttpHandler::getRequest(const std::string& requestUri,
+        const std::vector<std::pair<std::string, std::string>>& headers)
     {
         std::list<std::string> headerList;
         // Converting the headers in the Curl format taking a list of strings in the form key:value
         std::transform (headers.begin(), headers.end(), std::back_inserter(headerList),
             [] (const std::pair<std::string, std::string>& header) { return header.first + ":" + header.second; });
         curlpp::options::HttpHeader httpHeaders(headerList);
+
         // Curl is performing the copy of the object: allocation on the heap could be used
         // in order to be more efficient
         std::stringstream responseStream;
@@ -43,15 +44,15 @@ namespace network
         requestHandler_.setOpt(curlpp::options::WriteStream(&responseStream));
         requestHandler_.perform();
 
-        httpResponseBody = responseStream.str();
-        return curlpp::infos::ResponseCode::get(requestHandler_);
+        // It seems that Curlpp doesn't provide access to response headers: skipping them
+        HttpResponse response(responseStream.str(), curlpp::infos::ResponseCode::get(requestHandler_));
+        return response;
     }
 
-    short CurlHttpHandler::getRequest(const std::string& requestUri, 
-        std::string& httpResponseBody)
+    HttpResponse CurlHttpHandler::getRequest(const std::string& requestUri)
     {
         std::vector<std::pair<std::string, std::string>> v;
-        return getRequest(requestUri, v, httpResponseBody);
+        return getRequest(requestUri, v);
     }
 }
 

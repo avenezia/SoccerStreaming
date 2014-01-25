@@ -1,5 +1,5 @@
-#TODO: fix problem in network include
 env = Environment()
 env.Append(CPPFLAGS = ["-std=c++0x", "-Wall"])
-env.Append(CPPPATH = ["network"])
+env.Append(CPPPATH = ["../network"])
 env.Object(source = "LiveFootballHandler.cpp")
+env.Object(source = "StreamingInfo.cpp")
