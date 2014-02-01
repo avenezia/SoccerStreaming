@@ -1,5 +1,13 @@
+Import('compilerFlags')
 env = Environment()
-env.Append(CPPFLAGS = ["-std=c++0x", "-Wall"])
+env.Append(CPPFLAGS = compilerFlags)
 env.Append(CPPPATH = ["../network"])
-env.Object(source = "LiveFootballHandler.cpp")
-env.Object(source = "StreamingInfo.cpp")
+
+sourceFiles = ["LiveFootballHandler.cpp", "StreamingInfo.cpp"]
+objects = []
+
+for sourceFile in sourceFiles:
+    object = env.Object(source = sourceFile)
+    objects.append(object)
+      
+Return("objects")

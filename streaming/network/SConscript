@@ -1,5 +1,15 @@
+Import('compilerFlags')
 env = Environment()
-env.Append(CPPFLAGS = ["-std=c++0x", "-Wall"])
-env.Object(source = "HttpResponse.cpp")
-env.Object(source = "CurlHttpHandler.cpp")
+env.Append(CPPFLAGS = compilerFlags)
+
+sourceFiles = ["HttpResponse.cpp", "CurlHttpHandler.cpp"]
+objects = []
+
+for sourceFile in sourceFiles:
+    object = env.Object(source = sourceFile)
+    objects.append(object)
+      
+Return("objects")
+
+
 

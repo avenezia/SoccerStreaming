@@ -13,8 +13,8 @@ namespace website
     class StreamingHandler
     {
         public:
-            StreamingHandler();
-            virtual ~StreamingHandler();
+            StreamingHandler() = default;
+            virtual ~StreamingHandler() = default;
 
             virtual std::vector<StreamingInfo> getStreamingLinks(const std::string& teamName) = 0;
     };

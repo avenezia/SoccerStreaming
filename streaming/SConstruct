@@ -1,21 +1,30 @@
-from os import listdir
+#Reading build mode, currently default is debug, it will be release
+buildMode = ARGUMENTS.get('mode', 'debug')
+assert(buildMode == "release" or buildMode == "debug")
 
+buildFolder = "build/" + buildMode + "/"
 networkFolder = "network/"
 websiteFolder = "website/"
-buildFolder = "build/"
 
-objectFolders = [buildFolder + networkFolder, buildFolder + websiteFolder]
-
+compilerFlags = ["-std=c++0x", "-Wall", "-Werror"]
+if buildMode == "debug":
+    compilerFlags.append("-g")
+Export('compilerFlags')    
+    
 env = Environment()
-env.Append(CPPFLAGS = ["-std=c++0x", "-Wall"])
-#env.Append(CPPPATH = [networkFolder, websiteFolder, "/usr/local/include/"])
-env.Append(CPPPATH = ["/usr/local/include/"])
-
-a = SConscript(networkFolder + "SConscript", variant_dir = buildFolder + networkFolder, duplicate = 0)
-SConscript(websiteFolder + "SConscript", variant_dir = buildFolder + websiteFolder, duplicate = 0)
+env.Append(CPPFLAGS = compilerFlags)
+env.Append(CPPPATH = [networkFolder, websiteFolder, "/usr/local/include/"])
+env.ParseConfig('pkg-config --libs curlpp')
 
 objects = []
-for folder in objectFolders:
-    objects.extend([ folder + object for object in listdir(folder) ])     
+#network part
+networkObjects = SConscript(networkFolder + "SConscript", variant_dir = buildFolder + networkFolder, duplicate = 0)
+objects.extend(networkObjects)
 
-env.Program("main.cpp", objects)
+#website part
+websiteObjects = SConscript(websiteFolder + "SConscript", variant_dir = buildFolder + websiteFolder, duplicate = 0)
+objects.extend(websiteObjects)
+
+mainObject = env.Object(source = "main.cpp")
+objects.append(mainObject)
+env.Program("main", objects)
