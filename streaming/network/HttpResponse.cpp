@@ -1,7 +1,5 @@
 #include "HttpResponse.hpp"
 
-// TODO: remove it
-#include <iostream>
 #include <utility>
 
 namespace network
@@ -25,8 +23,7 @@ namespace network
 			header_(std::move(h.header_)),
 			statusCode_(std::move(h.statusCode_))
 	{
-		// TODO: remove it
-		std::cout << "Moving HttpResponse" << std::endl;
+
 	}
 
 	const std::string& HttpResponse::getBody() const

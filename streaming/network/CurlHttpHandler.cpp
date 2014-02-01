@@ -45,6 +45,8 @@ namespace network
         requestHandler_.perform();
 
         // It seems that Curlpp doesn't provide access to response headers: skipping them
+        // Returning the response by value is ok because the Return value optimization or
+        // move semantics will be used, avoiding huge copies
         HttpResponse response(responseStream.str(), curlpp::infos::ResponseCode::get(requestHandler_));
         return response;
     }

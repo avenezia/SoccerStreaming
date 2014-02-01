@@ -6,7 +6,7 @@ buildFolder = "build/" + buildMode + "/"
 networkFolder = "network/"
 websiteFolder = "website/"
 
-compilerFlags = ["-std=c++0x", "-Wall", "-Werror"]
+compilerFlags = ["-std=c++11", "-Wall", "-Werror"]
 if buildMode == "debug":
     compilerFlags.append("-g")
 Export('compilerFlags')    
