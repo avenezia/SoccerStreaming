@@ -52,11 +52,11 @@ namespace network
     }
 
     HttpResponse CurlHttpHandler::getRequest(const std::string& requestUri,
-		const std::pair<std::string, std::string>& singleHeader)
+        const std::pair<std::string, std::string>& singleHeader)
     {
-    	std::vector<std::pair<std::string, std::string>> v;
-    	v.push_back(singleHeader);
-		return getRequest(requestUri, v);
+        std::vector<std::pair<std::string, std::string>> v;
+        v.push_back(singleHeader);
+        return getRequest(requestUri, v);
     }
 
     HttpResponse CurlHttpHandler::getRequest(const std::string& requestUri)

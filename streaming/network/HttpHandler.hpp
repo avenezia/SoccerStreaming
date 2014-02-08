@@ -6,7 +6,7 @@
 
 namespace network
 {
-	class HttpResponse;
+    class HttpResponse;
 
     class HttpHandler
     {
@@ -18,7 +18,7 @@ namespace network
             virtual HttpResponse getRequest(const std::string& requestUri,
                 const std::vector<std::pair<std::string, std::string>>& headerList) = 0;
             virtual HttpResponse getRequest(const std::string& requestUri,
-				const std::pair<std::string, std::string>& singleHeader) = 0;
+                const std::pair<std::string, std::string>& singleHeader) = 0;
             virtual HttpResponse getRequest(const std::string& requestUri) = 0;
     };
 }

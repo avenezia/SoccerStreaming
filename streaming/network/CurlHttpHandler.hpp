@@ -10,7 +10,7 @@
 
 namespace network
 {
-	class HttpResponse;
+    class HttpResponse;
 
     class CurlHttpHandler : public HttpHandler
     {
@@ -21,7 +21,7 @@ namespace network
             virtual HttpResponse getRequest(const std::string& requestUri,
                 const std::vector<std::pair<std::string, std::string>>& headers);
             virtual HttpResponse getRequest(const std::string& requestUri,
-				const std::pair<std::string, std::string>& singleHeader);
+                const std::pair<std::string, std::string>& singleHeader);
             virtual HttpResponse getRequest(const std::string& requestUri);
 
         private:

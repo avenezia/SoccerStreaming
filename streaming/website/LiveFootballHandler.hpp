@@ -12,7 +12,7 @@ namespace network{ class HttpHandler; }
 
 namespace website
 {
-	class StreamingInfo;
+    class StreamingInfo;
 
     class LiveFootballHandler : public StreamingHandler
     {
