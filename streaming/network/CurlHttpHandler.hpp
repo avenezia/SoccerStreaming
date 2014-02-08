@@ -20,6 +20,8 @@ namespace network
 
             virtual HttpResponse getRequest(const std::string& requestUri,
                 const std::vector<std::pair<std::string, std::string>>& headers);
+            virtual HttpResponse getRequest(const std::string& requestUri,
+				const std::pair<std::string, std::string>& singleHeader);
             virtual HttpResponse getRequest(const std::string& requestUri);
 
         private:

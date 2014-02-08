@@ -14,6 +14,7 @@ Export('compilerFlags')
 env = Environment()
 env.Append(CPPFLAGS = compilerFlags)
 env.Append(CPPPATH = [networkFolder, websiteFolder, "/usr/local/include/"])
+env.Append(LIBS=["boost_regex"])
 env.ParseConfig('pkg-config --libs curlpp')
 
 objects = []

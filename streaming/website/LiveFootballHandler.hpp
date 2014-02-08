@@ -6,6 +6,8 @@
 
 #include <memory>
 
+#include <boost/regex.hpp>
+
 namespace network{ class HttpHandler; }
 
 namespace website
@@ -21,6 +23,12 @@ namespace website
             virtual std::vector<StreamingInfo> getStreamingLinks(const std::string& teamName);
 
         private:
+            static const boost::regex kAccessCookieRegExp;
+
+            std::string getAccessCookieFromHomePage() const;
+            std::string getRealHomePage(const std::string& accessCookie) const;
+            std::string parseAccessCookie(const std::string& webPage) const;
+
             std::unique_ptr<network::HttpHandler> httpHandler_;
     };
 }
