@@ -1,0 +1,12 @@
+Import('compilerFlags')
+env = Environment()
+env.Append(CPPFLAGS = compilerFlags)
+
+sourceFiles = ["LiveFootballParser.cpp"]
+objects = []
+
+for sourceFile in sourceFiles:
+    object = env.Object(source = sourceFile)
+    objects.append(object)
+      
+Return("objects")

@@ -4,6 +4,7 @@ assert(buildMode == "release" or buildMode == "debug")
 
 buildFolder = "build/" + buildMode + "/"
 networkFolder = "network/"
+parserFolder  = "parser/"
 websiteFolder = "website/"
 
 compilerFlags = ["-std=c++11", "-Wall", "-Werror"]
@@ -13,14 +14,20 @@ Export('compilerFlags')
     
 env = Environment()
 env.Append(CPPFLAGS = compilerFlags)
-env.Append(CPPPATH = [networkFolder, websiteFolder, "/usr/local/include/"])
+env.Append(CPPPATH = [networkFolder, parserFolder, websiteFolder, "/usr/local/include/"])
 env.Append(LIBS=["boost_regex"])
 env.ParseConfig('pkg-config --libs curlpp')
+env.ParseConfig('pkg-config --libs gumbo')
 
 objects = []
+
 #network part
 networkObjects = SConscript(networkFolder + "SConscript", variant_dir = buildFolder + networkFolder, duplicate = 0)
 objects.extend(networkObjects)
+
+#parser part
+parserObjects = SConscript(parserFolder + "SConscript", variant_dir = buildFolder + parserFolder, duplicate = 0)
+objects.extend(parserObjects)
 
 #website part
 websiteObjects = SConscript(websiteFolder + "SConscript", variant_dir = buildFolder + websiteFolder, duplicate = 0)
