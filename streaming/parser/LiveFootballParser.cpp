@@ -7,6 +7,9 @@
 
 namespace parser
 {
+    // The value of the class attribute of the span element, parent of the links
+    const std::string LiveFootballParser::kSpanClassValue("argr_custom");
+
     LiveFootballParser::LiveFootballParser():
         parseTree_(nullptr, gumboPtrDeleter),
         teamName_("")
@@ -22,10 +25,13 @@ namespace parser
     std::string LiveFootballParser::getLinkForTeamMatch(const std::string& indexPage,
             const std::string& teamName)
     {
-        return "";
+        teamName_ = teamName;
+        parsePage(indexPage);
+        return searchLinkForTeam(parseTree_->root);
     }
 
-    bool LiveFootballParser::isParentOfMatchLink(GumboNode* node)
+    // Utility method to check if the node can be the parent of the match links
+    bool LiveFootballParser::isParentOfMatchLink(const GumboNode *node)
     {
         if (node == nullptr)
             return false;
@@ -33,7 +39,7 @@ namespace parser
         {
             GumboAttribute* classAttribute;
             if ((classAttribute = gumbo_get_attribute(&node->v.element.attributes, "class")) &&
-                strstr(classAttribute->value, "argr_custom") != nullptr)
+                strstr(classAttribute->value, kSpanClassValue.c_str()) != nullptr)
             {
                 return true;
             }
@@ -47,28 +53,32 @@ namespace parser
         parseTree_.reset(gumbo_parse(indexPage.c_str()));
     }
 
-    std::string LiveFootballParser::searchLinkForTeam(GumboNode* node)
+    std::string LiveFootballParser::searchLinkForTeam(const GumboNode *node)
     {
         if (node->type != GUMBO_NODE_ELEMENT)
         {
             return "";
         }
 
+        // The links we are interested in are the ones that are children of
+        // span elements with class equal to the value in kSpanClassValue variable
+        // (Currently argr_custom). Following jquery notation, it is $("span.argr_custom a")
         GumboAttribute* href;
         if (node->v.element.tag == GUMBO_TAG_A &&
             (href = gumbo_get_attribute(&node->v.element.attributes, "href")) &&
             isParentOfMatchLink(node->parent))
         {
+            // Checking if the link contains the name of the team
             if (strstr(href->value, teamName_.c_str()) != nullptr)
             {
                 return href->value;
             }
         }
 
-        GumboVector* children = &node->v.element.children;
+        const GumboVector *children = &node->v.element.children;
         for (unsigned int i = 0; i < children->length; ++i)
         {
-            std::string currentResult = searchLinkForTeam(static_cast<GumboNode*>(children->data[i]));
+            std::string currentResult = searchLinkForTeam(static_cast<const GumboNode*>(children->data[i]));
             if (currentResult != "")
             {
                 return currentResult;
@@ -78,7 +88,7 @@ namespace parser
         return "";
     }
 
-    void gumboPtrDeleter(GumboOutput* gumboPtr)
+    void gumboPtrDeleter(GumboOutput *gumboPtr)
     {
         if (gumboPtr != nullptr)
         {

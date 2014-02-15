@@ -2,6 +2,7 @@ Import('compilerFlags')
 env = Environment()
 env.Append(CPPFLAGS = compilerFlags)
 env.Append(CPPPATH = ["../network"])
+env.Append(CPPPATH = ["../parser"])
 
 sourceFiles = ["LiveFootballHandler.cpp", "StreamingInfo.cpp"]
 objects = []

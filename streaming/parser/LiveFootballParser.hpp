@@ -17,15 +17,17 @@ namespace parser
             std::string getLinkForTeamMatch(const std::string& indexPage,
                     const std::string& teamName);
         private:
-            bool isParentOfMatchLink(GumboNode* node);
+            bool isParentOfMatchLink(const GumboNode *node);
             void parsePage(const std::string& indexPage);
-            std::string searchLinkForTeam(GumboNode* node);
+            std::string searchLinkForTeam(const GumboNode *node);
+
+            static const std::string kSpanClassValue;
 
             std::unique_ptr<GumboOutput, void(*)(GumboOutput*)> parseTree_;
             std::string teamName_;
     };
 
-    void gumboPtrDeleter(GumboOutput* gumboPtr);
+    void gumboPtrDeleter(GumboOutput *gumboPtr);
 }
 
 #endif /* LIVEFOOTBALLPARSE_HPP_ */

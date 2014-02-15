@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+using namespace std;
 
 #include <boost/regex.hpp>
 
@@ -14,8 +15,10 @@ namespace website
 {    
     const boost::regex LiveFootballHandler::kAccessCookieRegExp("unddos=[0-9a-z]+");
 
-    LiveFootballHandler::LiveFootballHandler(const std::string& hostName)
-        :httpHandler_(new network::CurlHttpHandler(hostName))
+    LiveFootballHandler::LiveFootballHandler(const string& hostName)
+        :accessCookie_(""),
+         htmlParser_(),
+         httpHandler_(new network::CurlHttpHandler(hostName))
     {
 
     }
@@ -25,59 +28,58 @@ namespace website
 
     }
 
-    std::string LiveFootballHandler::getAccessCookieFromHomePage() const
+    void LiveFootballHandler::setAccessCookieFromHomePage()
     {
         network::HttpResponse homePageResponse = httpHandler_->getRequest("/");
         if (homePageResponse.getStatusCode() == 200 )
         {
             // Getting the cookie useful to get the real home page
-            return parseAccessCookie(homePageResponse.getBody());
+            accessCookie_ = parseAccessCookie(homePageResponse.getBody());
         }
         else
         {
             // TODO: use a better way of logging
-            std::cerr << "LiveFootball - HTTP error while fetching home, status code " <<
-                    homePageResponse.getStatusCode() << std::endl;
+            cerr << "LiveFootball - HTTP error while fetching home, status code " <<
+                    homePageResponse.getStatusCode() << endl;
         }
-
-        return "";
     }
 
-    std::string LiveFootballHandler::getRealHomePage(const std::string& accessCookie) const
+    string LiveFootballHandler::getRealHomePage() const
     {
-        if (accessCookie != "")
+        if (accessCookie_ != "")
         {
             network::HttpResponse realHomePageResponse = httpHandler_->getRequest("/",
-                    std::make_pair("Cookie", accessCookie));
+                    make_pair("Cookie", accessCookie_));
             if (realHomePageResponse.getStatusCode() == 200)
             {
                 return realHomePageResponse.getBody();
             }
             else
             {
-                std::cerr << "LiveFootball - HTTP error while fetching home, status code " <<
-                        realHomePageResponse.getStatusCode() << std::endl;
+                cerr << "LiveFootball - HTTP error while fetching home, status code " <<
+                        realHomePageResponse.getStatusCode() << endl;
             }
         }
         else
         {
             // TODO: use a better way of logging
-            std::cerr << "LiveFootball: unable to get the access cookie";
+            cerr << "LiveFootball: unable to get the access cookie";
         }
 
         return "";
     }
 
-    std::vector<StreamingInfo> LiveFootballHandler::getStreamingLinks(const std::string& teamName)
+    vector<StreamingInfo> LiveFootballHandler::getStreamingLinks(const string& teamName)
     {
-        std::vector<StreamingInfo> result;
-        std::string accessCookie = getAccessCookieFromHomePage();
-        std::cout << getRealHomePage(accessCookie);
-
+        vector<StreamingInfo> result;
+        setAccessCookieFromHomePage();
+        string homePage = getRealHomePage();
+        std::string linkForMatchInfo = htmlParser_.getLinkForTeamMatch(homePage, teamName);
+        cout << linkForMatchInfo << endl;
         return result;
     }
 
-    std::string LiveFootballHandler::parseAccessCookie(const std::string& webPage) const
+    string LiveFootballHandler::parseAccessCookie(const string& webPage) const
     {
         boost::smatch regExpMatch;
         if (boost::regex_search(webPage, regExpMatch, kAccessCookieRegExp))
