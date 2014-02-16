@@ -1,6 +1,7 @@
 #ifndef LIVE_FOOTBALL_PARSER_HPP_
 #define LIVE_FOOTBALL_PARSER_HPP_
 
+#include <boost/regex.hpp>
 #include <memory>
 #include <string>
 
@@ -18,11 +19,16 @@ namespace parser
                     const std::string& teamName);
         private:
             bool isParentOfMatchLink(const GumboNode *node);
+            void parseMatchId(const std::string& linkToMatchPage);
             void parsePage(const std::string& indexPage);
-            std::string searchLinkForTeam(const GumboNode *node);
+            void parseTableWithStreamingLinks(GumboNode* parentNode);
+            std::string searchLinkForTeamMatch(const GumboNode *node);
+            GumboNode* searchParentDivForMatch(GumboNode* node, const char* matchId);
 
+            static const boost::regex kMatchIdRegExp;
             static const std::string kSpanClassValue;
 
+            std::string matchId_;
             std::unique_ptr<GumboOutput, void(*)(GumboOutput*)> parseTree_;
             std::string teamName_;
     };
