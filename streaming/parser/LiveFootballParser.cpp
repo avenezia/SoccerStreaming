@@ -3,9 +3,11 @@
 #include <boost/regex.hpp>
 #include <cstring>
 #include <string>
+#include <vector>
 using namespace std;
 
 #include "gumbo.h"
+#include "StreamingInfo.hpp"
 
 namespace parser
 {
@@ -13,8 +15,11 @@ namespace parser
     const boost::regex LiveFootballParser::kMatchIdRegExp("(/)([0-9]+)(-)");
     // The value of the class attribute of the span element, parent of the links
     const string LiveFootballParser::kSpanClassValue("argr_custom");
+    // The index of the table containing the links of the streaming for a match
+    const int LiveFootballParser::kLinkTableIndex = 2;
 
     LiveFootballParser::LiveFootballParser():
+        matchId_(""),
         parseTree_(nullptr, gumboPtrDeleter),
         teamName_("")
     {
@@ -34,7 +39,39 @@ namespace parser
         return searchLinkForTeamMatch(parseTree_->root);
     }
 
-    // Utility method to check if the node can be the parent of the match links
+    vector<website::StreamingInfo> LiveFootballParser::getStreamingLinks(const string& matchPage)
+    {
+        parsePage(matchPage);
+        GumboNode* divNode = searchParentDivForMatch(parseTree_->root);
+        if (divNode != nullptr)
+        {
+            GumboVector* tableRowList = getNodesWithStreamingLinks(divNode);
+            if (tableRowList != nullptr)
+            {
+
+            }
+            else
+            {
+                //TODO: remove me
+                cerr << "Error while searching tbody" << endl;
+            }
+        }
+        else
+        {
+            //TODO: remove me
+            cerr << "Error while searching div" << endl;
+        }
+
+        vector<website::StreamingInfo> result;
+        return result;
+    }
+
+    /// Utility method to check if the node can be the <span> parent of the <a>
+    /// element containing the link for the match
+    /// For example
+    /// <span class="argr_custom more">
+    ///   <a href="http://livefootball.ws/13328-champions-league-galatasaray-chelsea.html"></a>
+    /// </span>
     bool LiveFootballParser::isParentOfMatchLink(const GumboNode *node)
     {
         if (node == nullptr)
@@ -52,13 +89,16 @@ namespace parser
         return false;
     }
 
+    /// The method parses the link to a page containing the streamings of a match
+    /// and store the id of the match. For example, in the following link
+    /// http://livefootball.ws/13328-champions-league-galatasaray-chelsea.html
+    // it will store the id 13328
     void LiveFootballParser::parseMatchId(const std::string& linkToMatchPage)
     {
         boost::smatch regExpMatch;
         if (boost::regex_search(linkToMatchPage, regExpMatch, kMatchIdRegExp))
         {
             matchId_ = regExpMatch[2].str();
-            cout << matchId_ << endl;
         }
         else
         {
@@ -66,33 +106,59 @@ namespace parser
         }
     }
 
-    void LiveFootballParser::parsePage(const string& indexPage)
+    void LiveFootballParser::parsePage(const string& htmlPage)
     {
-        parseTree_.reset(gumbo_parse(indexPage.c_str()));
+        parseTree_.reset(gumbo_parse(htmlPage.c_str()));
     }
 
-    void LiveFootballParser::parseTableWithStreamingLinks(GumboNode* parentNode)
+    /// The method returns the list of <tr> elements containing the information for a specific streaming
+    GumboVector* LiveFootballParser::getNodesWithStreamingLinks(GumboNode* divParentNode)
     {
-        if (parentNode != nullptr)
+        if (divParentNode == nullptr)
         {
-            GumboVector* childrenList = &parentNode->v.element.children;
-            GumboNode* currentChild = nullptr;
-            int tableCounter = 0;
-            for (unsigned int i = 0; i < childrenList->length && tableCounter < 2; ++i)
+            cerr << "LiveFootballParser - div Node is null" << endl;
+            return nullptr;
+        }
+
+        GumboVector* divChildrenList = &divParentNode->v.element.children;
+        GumboNode* divChild = nullptr;
+        int tableCounter = 0;
+        // Looking for the second table that is the child of the divParentNode
+        for (unsigned int i = 0; i < divChildrenList->length && tableCounter < kLinkTableIndex; ++i)
+        {
+            divChild = static_cast<GumboNode*>(divChildrenList->data[i]);
+            if (divChild != nullptr &&
+                divChild->type == GUMBO_NODE_ELEMENT &&
+                divChild->v.element.tag == GUMBO_TAG_TABLE)
             {
-                currentChild = static_cast<GumboNode*>(childrenList->data[i]);
-                if (currentChild != nullptr &&
-                    currentChild->type == GUMBO_NODE_ELEMENT &&
-                    currentChild->v.element.tag == GUMBO_TAG_TABLE)
+                ++tableCounter;
+            }
+        }
+
+        if (divChild != nullptr && tableCounter == kLinkTableIndex)
+        {
+            // divChild is the table containing the <tr> elements with the
+            // links to the streaming: <table><tbody><tr></tr><tr></tr></tbody></table>
+            GumboVector* tableChildrenList = &divChild->v.element.children;
+            GumboNode* tableChild = nullptr;
+            // Looking for the tbody element in order to return its children,
+            // the tr elements containing the link for the streaming
+            for (unsigned int i = 0; i < tableChildrenList->length; ++i)
+            {
+                tableChild = static_cast<GumboNode*>(tableChildrenList->data[i]);
+                if (tableChild != nullptr &&
+                    tableChild->type == GUMBO_NODE_ELEMENT &&
+                    tableChild->v.element.tag == GUMBO_TAG_TBODY)
                 {
-                    ++tableCounter;
+                    return &tableChild->v.element.children;
                 }
             }
-
-            // TODO: continue parsing
         }
+
+        return nullptr;
     }
 
+    /// The method searches the link to the details of the streaming for a specific team
     string LiveFootballParser::searchLinkForTeamMatch(const GumboNode *node)
     {
         if (node->type != GUMBO_NODE_ELEMENT)
@@ -132,7 +198,9 @@ namespace parser
         return "";
     }
 
-    GumboNode* searchParentDivForMatch(GumboNode* node, const char* matchId)
+    /// This method looks for the div (addressable by id) inside the web page
+    /// containing the details of the streaming for one specific match
+    GumboNode* LiveFootballParser::searchParentDivForMatch(GumboNode* node)
     {
         if (node->type != GUMBO_NODE_ELEMENT)
         {
@@ -142,7 +210,7 @@ namespace parser
         if (node->v.element.tag == GUMBO_TAG_DIV)
         {
             GumboAttribute* id = gumbo_get_attribute(&node->v.element.attributes, "id");
-            if (id != nullptr && strstr(id->value, matchId) != nullptr)
+            if (id != nullptr && strstr(id->value, matchId_.c_str()) != nullptr)
             {
                 return node;
             }
@@ -151,7 +219,7 @@ namespace parser
         GumboVector* children = &node->v.element.children;
         for (unsigned int i = 0; i < children->length; ++i)
         {
-            GumboNode* currentResult = searchParentDivForMatch(static_cast<GumboNode*>(children->data[i]), matchId);
+            GumboNode* currentResult = searchParentDivForMatch(static_cast<GumboNode*>(children->data[i]));
             if (currentResult != nullptr)
                 return currentResult;
         }

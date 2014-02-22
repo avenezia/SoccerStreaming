@@ -2,6 +2,8 @@ Import('compilerFlags')
 env = Environment()
 env.Append(CPPFLAGS = compilerFlags)
 
+env.Append(CPPPATH = ["../website"])
+
 sourceFiles = ["LiveFootballParser.cpp"]
 objects = []
 

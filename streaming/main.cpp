@@ -3,8 +3,10 @@
 
 
 #include "LiveFootballHandler.hpp"
+#include "LiveFootballParser.hpp"
 
 #include <algorithm>
+#include <fstream>
 #include <iostream>
 #include <iterator>
 #include <list>
@@ -12,6 +14,28 @@
 #include <utility>
 #include <vector>
 using namespace std;
+
+string openFile(const std::string& fileName)
+{
+    string result;
+    string line;
+    ifstream fileStream(fileName);
+    if (fileStream.is_open())
+    {
+        while (fileStream.good())
+        {
+            getline (fileStream,line);
+            result += line;
+        }
+        fileStream.close();
+    }
+    else
+    {
+        cerr << "Unable to open file";
+    }
+
+    return result;
+}
 
 int main(int argc, char *argv[])
 {
@@ -26,7 +50,11 @@ int main(int argc, char *argv[])
 
     if (argc == 2)
     {
-        website::LiveFootballHandler handler("http://livefootball.ws/");
-        handler.getStreamingLinks(argv[1]);
+        //website::LiveFootballHandler handler("http://livefootball.ws/");
+        //handler.getStreamingLinks(argv[1]);
+        string webPage(openFile(argv[1]));
+        cout << webPage.length() << endl;
+        parser::LiveFootballParser parser;
+        parser.getStreamingLinks(webPage);
     }
 }
