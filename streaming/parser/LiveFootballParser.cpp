@@ -66,51 +66,6 @@ namespace parser
         return result;
     }
 
-    /// Utility method to check if the node can be the <span> parent of the <a>
-    /// element containing the link for the match
-    /// For example
-    /// <span class="argr_custom more">
-    ///   <a href="http://livefootball.ws/13328-champions-league-galatasaray-chelsea.html"></a>
-    /// </span>
-    bool LiveFootballParser::isParentOfMatchLink(const GumboNode *node)
-    {
-        if (node == nullptr)
-            return false;
-        if (node->v.element.tag == GUMBO_TAG_SPAN)
-        {
-            GumboAttribute* classAttribute;
-            if ((classAttribute = gumbo_get_attribute(&node->v.element.attributes, "class")) &&
-                strstr(classAttribute->value, kSpanClassValue.c_str()) != nullptr)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /// The method parses the link to a page containing the streamings of a match
-    /// and store the id of the match. For example, in the following link
-    /// http://livefootball.ws/13328-champions-league-galatasaray-chelsea.html
-    // it will store the id 13328
-    void LiveFootballParser::parseMatchId(const std::string& linkToMatchPage)
-    {
-        boost::smatch regExpMatch;
-        if (boost::regex_search(linkToMatchPage, regExpMatch, kMatchIdRegExp))
-        {
-            matchId_ = regExpMatch[2].str();
-        }
-        else
-        {
-            cerr << "LiveFootballParser - Unable to parse the match id for " << linkToMatchPage << endl;
-        }
-    }
-
-    void LiveFootballParser::parsePage(const string& htmlPage)
-    {
-        parseTree_.reset(gumbo_parse(htmlPage.c_str()));
-    }
-
     /// The method returns the list of <tr> elements containing the information for a specific streaming
     GumboVector* LiveFootballParser::getNodesWithStreamingLinks(GumboNode* divParentNode)
     {
@@ -158,6 +113,98 @@ namespace parser
         return nullptr;
     }
 
+    /// Utility method to check if the node can be the <span> parent of the <a>
+    /// element containing the link for the match
+    /// For example
+    /// <span class="argr_custom more">
+    ///   <a href="http://livefootball.ws/13328-champions-league-galatasaray-chelsea.html"></a>
+    /// </span>
+    bool LiveFootballParser::isParentOfMatchLink(const GumboNode *node)
+    {
+        if (node == nullptr)
+            return false;
+        if (node->v.element.tag == GUMBO_TAG_SPAN)
+        {
+            GumboAttribute* classAttribute;
+            if ((classAttribute = gumbo_get_attribute(&node->v.element.attributes, "class")) &&
+                strstr(classAttribute->value, kSpanClassValue.c_str()) != nullptr)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// The method parses the link to a page containing the streamings of a match
+    /// and store the id of the match. For example, in the following link
+    /// http://livefootball.ws/13328-champions-league-galatasaray-chelsea.html
+    // it will store the id 13328
+    void LiveFootballParser::parseMatchId(const std::string& linkToMatchPage)
+    {
+        boost::smatch regExpMatch;
+        if (boost::regex_search(linkToMatchPage, regExpMatch, kMatchIdRegExp))
+        {
+            matchId_ = regExpMatch[2].str();
+        }
+        else
+        {
+            cerr << "LiveFootballParser - Unable to parse the match id for " << linkToMatchPage << endl;
+        }
+    }
+
+    /// The method parses the list of <tr> elements containing the information for the streaming
+    vector<website::StreamingInfo> parseNodesWithStreamingLinks(GumboVector* trElementList)
+    {
+        vector<website::StreamingInfo> streamingLinks;
+        if (trElementList != nullptr)
+        {
+            for (unsigned int i = 0; i < trElementList->length; ++i)
+            {
+                GumboNode* trElement = static_cast<GumboNode*>(trElementList->data[i]);
+                //streamingLinks.push_back()
+            }
+        }
+        else
+        {
+            cerr << "LiveFootballParser - The list of <tr> elements containing the streaming info is null" << endl;
+        }
+
+        return streamingLinks;
+    }
+
+    // The method parses a single <tr> element containing the information for the streaming
+    website::StreamingInfo parseNodeWithStreamingLink(GumboNode* trElement)
+    {
+        website::StreamingInfo streamingInfo;
+        if (trElement != nullptr)
+        {
+            GumboVector* trChildrenList = &trElement->v.element.children;
+            GumboNode* trChild = nullptr;
+            // Each child should be a <td> element containing some information
+            for (unsigned int tdIndex = 0; tdIndex < trChildrenList->length; ++tdIndex)
+            {
+                trChild = static_cast<GumboNode*>(trChildrenList->data[tdIndex]);
+                if (trChild != nullptr &&
+                    trChild->type == GUMBO_NODE_ELEMENT &&
+                    trChild->v.element.tag == GUMBO_TAG_TD)
+                {
+                }
+            }
+        }
+        else
+        {
+            cerr << "LiveFootballParser - A <tr> element containing the streaming info is null" << endl;
+        }
+
+        return streamingInfo;
+    }
+
+    void LiveFootballParser::parsePage(const string& htmlPage)
+    {
+        parseTree_.reset(gumbo_parse(htmlPage.c_str()));
+    }
+
     /// The method searches the link to the details of the streaming for a specific team
     string LiveFootballParser::searchLinkForTeamMatch(const GumboNode *node)
     {
@@ -185,7 +232,7 @@ namespace parser
             }
         }
 
-        const GumboVector *children = &node->v.element.children;
+        const GumboVector* children = &node->v.element.children;
         for (unsigned int i = 0; i < children->length; ++i)
         {
             string currentResult = searchLinkForTeamMatch(static_cast<const GumboNode*>(children->data[i]));

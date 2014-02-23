@@ -10,6 +10,14 @@ namespace website
 
 	}
 
+    StreamingInfo::StreamingInfo():
+        link_(""),
+        channel_(""),
+        bitRate_("")
+    {
+
+    }
+
     const std::string& StreamingInfo::getBitRate() const
     {
     	return bitRate_;

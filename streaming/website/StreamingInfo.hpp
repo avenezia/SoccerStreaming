@@ -9,6 +9,7 @@ namespace website
     {
         public:
             StreamingInfo(const std::string& link, const std::string& channel, const std::string& bitrate);
+            StreamingInfo();
             ~StreamingInfo() = default;
 
             const std::string& getBitRate() const;

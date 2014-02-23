@@ -26,10 +26,12 @@ namespace parser
             std::vector<website::StreamingInfo> getStreamingLinks(const std::string& matchPage);
 
         private:
+            GumboVector* getNodesWithStreamingLinks(GumboNode* divParentNode);
             bool isParentOfMatchLink(const GumboNode *node);
             void parseMatchId(const std::string& linkToMatchPage);
+            std::vector<website::StreamingInfo> parseNodesWithStreamingLinks(GumboVector* trElementList);
+            website::StreamingInfo parseNodeWithStreamingLink(GumboNode* trElement);
             void parsePage(const std::string& htmlPage);
-            GumboVector* getNodesWithStreamingLinks(GumboNode* divParentNode);
             std::string searchLinkForTeamMatch(const GumboNode *node);
             GumboNode* searchParentDivForMatch(GumboNode* node);
 
@@ -43,9 +45,9 @@ namespace parser
 
             enum class FieldIndex : std::uint8_t
             {
-              BITRATE = 3,
-              CHANNEL = 4,
-              LINK = 7
+                BITRATE = 3,
+                CHANNEL = 4,
+                LINK = 7
             };
     };
 
