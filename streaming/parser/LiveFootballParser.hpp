@@ -26,14 +26,16 @@ namespace parser
             std::vector<website::StreamingInfo> getStreamingLinks(const std::string& matchPage);
 
         private:
-            GumboVector* getNodesWithStreamingLinks(GumboNode* divParentNode);
-            bool isParentOfMatchLink(const GumboNode *node);
+            const GumboVector* getNodesWithStreamingLinks(const GumboNode* divParentNode) const;
+            bool isNodeOfSpecificTypeAndTag(const GumboNode* node, GumboTag nodeTag,
+                    GumboNodeType nodeType = GUMBO_NODE_ELEMENT) const;
+            bool isParentOfMatchLink(const GumboNode *node) const;
             void parseMatchId(const std::string& linkToMatchPage);
-            std::vector<website::StreamingInfo> parseNodesWithStreamingLinks(GumboVector* trElementList);
-            website::StreamingInfo parseNodeWithStreamingLink(GumboNode* trElement);
+            std::vector<website::StreamingInfo> parseNodesWithStreamingLinks(const GumboVector* trElementList) const;
+            website::StreamingInfo parseNodeWithStreamingLink(const GumboNode* trElement) const;
             void parsePage(const std::string& htmlPage);
             std::string searchLinkForTeamMatch(const GumboNode *node);
-            GumboNode* searchParentDivForMatch(GumboNode* node);
+            const GumboNode* searchParentDivForMatch(const GumboNode* node) const;
 
             static const boost::regex kMatchIdRegExp;
             static const std::string kSpanClassValue;

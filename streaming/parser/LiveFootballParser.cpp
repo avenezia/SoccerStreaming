@@ -42,10 +42,10 @@ namespace parser
     vector<website::StreamingInfo> LiveFootballParser::getStreamingLinks(const string& matchPage)
     {
         parsePage(matchPage);
-        GumboNode* divNode = searchParentDivForMatch(parseTree_->root);
+        const GumboNode* divNode = searchParentDivForMatch(parseTree_->root);
         if (divNode != nullptr)
         {
-            GumboVector* tableRowList = getNodesWithStreamingLinks(divNode);
+            const GumboVector* tableRowList = getNodesWithStreamingLinks(divNode);
             if (tableRowList != nullptr)
             {
 
@@ -67,7 +67,7 @@ namespace parser
     }
 
     /// The method returns the list of <tr> elements containing the information for a specific streaming
-    GumboVector* LiveFootballParser::getNodesWithStreamingLinks(GumboNode* divParentNode)
+    const GumboVector* LiveFootballParser::getNodesWithStreamingLinks(const GumboNode* divParentNode) const
     {
         if (divParentNode == nullptr)
         {
@@ -75,16 +75,15 @@ namespace parser
             return nullptr;
         }
 
-        GumboVector* divChildrenList = &divParentNode->v.element.children;
-        GumboNode* divChild = nullptr;
+        const GumboVector* divChildrenList = &divParentNode->v.element.children;
+        const GumboNode* divChild = nullptr;
         int tableCounter = 0;
         // Looking for the second table that is the child of the divParentNode
         for (unsigned int i = 0; i < divChildrenList->length && tableCounter < kLinkTableIndex; ++i)
         {
             divChild = static_cast<GumboNode*>(divChildrenList->data[i]);
-            if (divChild != nullptr &&
-                divChild->type == GUMBO_NODE_ELEMENT &&
-                divChild->v.element.tag == GUMBO_TAG_TABLE)
+
+            if (isNodeOfSpecificTypeAndTag(divChild, GUMBO_TAG_TABLE))
             {
                 ++tableCounter;
             }
@@ -94,16 +93,14 @@ namespace parser
         {
             // divChild is the table containing the <tr> elements with the
             // links to the streaming: <table><tbody><tr></tr><tr></tr></tbody></table>
-            GumboVector* tableChildrenList = &divChild->v.element.children;
-            GumboNode* tableChild = nullptr;
+            const GumboVector* tableChildrenList = &divChild->v.element.children;
+            const GumboNode* tableChild = nullptr;
             // Looking for the tbody element in order to return its children,
             // the tr elements containing the link for the streaming
             for (unsigned int i = 0; i < tableChildrenList->length; ++i)
             {
                 tableChild = static_cast<GumboNode*>(tableChildrenList->data[i]);
-                if (tableChild != nullptr &&
-                    tableChild->type == GUMBO_NODE_ELEMENT &&
-                    tableChild->v.element.tag == GUMBO_TAG_TBODY)
+                if (isNodeOfSpecificTypeAndTag(tableChild, GUMBO_TAG_TBODY))
                 {
                     return &tableChild->v.element.children;
                 }
@@ -113,17 +110,29 @@ namespace parser
         return nullptr;
     }
 
+    /// Utility method to check if the node matches a specific type and tag
+    bool LiveFootballParser::isNodeOfSpecificTypeAndTag(const GumboNode* node, GumboTag nodeTag,
+            GumboNodeType nodeType) const
+    {
+        if (node != nullptr &&
+            node->type == nodeType &&
+            node->v.element.tag == nodeTag)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     /// Utility method to check if the node can be the <span> parent of the <a>
     /// element containing the link for the match
     /// For example
     /// <span class="argr_custom more">
     ///   <a href="http://livefootball.ws/13328-champions-league-galatasaray-chelsea.html"></a>
     /// </span>
-    bool LiveFootballParser::isParentOfMatchLink(const GumboNode *node)
+    bool LiveFootballParser::isParentOfMatchLink(const GumboNode *node) const
     {
-        if (node == nullptr)
-            return false;
-        if (node->v.element.tag == GUMBO_TAG_SPAN)
+        if (isNodeOfSpecificTypeAndTag(node, GUMBO_TAG_SPAN))
         {
             GumboAttribute* classAttribute;
             if ((classAttribute = gumbo_get_attribute(&node->v.element.attributes, "class")) &&
@@ -154,14 +163,14 @@ namespace parser
     }
 
     /// The method parses the list of <tr> elements containing the information for the streaming
-    vector<website::StreamingInfo> parseNodesWithStreamingLinks(GumboVector* trElementList)
+    vector<website::StreamingInfo> LiveFootballParser::parseNodesWithStreamingLinks(const GumboVector* trElementList) const
     {
         vector<website::StreamingInfo> streamingLinks;
         if (trElementList != nullptr)
         {
             for (unsigned int i = 0; i < trElementList->length; ++i)
             {
-                GumboNode* trElement = static_cast<GumboNode*>(trElementList->data[i]);
+                //GumboNode* trElement = static_cast<GumboNode*>(trElementList->data[i]);
                 //streamingLinks.push_back()
             }
         }
@@ -174,20 +183,18 @@ namespace parser
     }
 
     // The method parses a single <tr> element containing the information for the streaming
-    website::StreamingInfo parseNodeWithStreamingLink(GumboNode* trElement)
+    website::StreamingInfo LiveFootballParser::parseNodeWithStreamingLink(const GumboNode* trElement) const
     {
         website::StreamingInfo streamingInfo;
         if (trElement != nullptr)
         {
-            GumboVector* trChildrenList = &trElement->v.element.children;
-            GumboNode* trChild = nullptr;
+            const GumboVector* trChildrenList = &trElement->v.element.children;
+            const GumboNode* trChild = nullptr;
             // Each child should be a <td> element containing some information
             for (unsigned int tdIndex = 0; tdIndex < trChildrenList->length; ++tdIndex)
             {
                 trChild = static_cast<GumboNode*>(trChildrenList->data[tdIndex]);
-                if (trChild != nullptr &&
-                    trChild->type == GUMBO_NODE_ELEMENT &&
-                    trChild->v.element.tag == GUMBO_TAG_TD)
+                if (isNodeOfSpecificTypeAndTag(trChild, GUMBO_TAG_TD))
                 {
                 }
             }
@@ -206,9 +213,9 @@ namespace parser
     }
 
     /// The method searches the link to the details of the streaming for a specific team
-    string LiveFootballParser::searchLinkForTeamMatch(const GumboNode *node)
+    string LiveFootballParser::searchLinkForTeamMatch(const GumboNode* node)
     {
-        if (node->type != GUMBO_NODE_ELEMENT)
+        if (node == nullptr || node->type != GUMBO_NODE_ELEMENT)
         {
             return "";
         }
@@ -247,9 +254,9 @@ namespace parser
 
     /// This method looks for the div (addressable by id) inside the web page
     /// containing the details of the streaming for one specific match
-    GumboNode* LiveFootballParser::searchParentDivForMatch(GumboNode* node)
+    const GumboNode* LiveFootballParser::searchParentDivForMatch(const GumboNode* node) const
     {
-        if (node->type != GUMBO_NODE_ELEMENT)
+        if (node == nullptr || node->type != GUMBO_NODE_ELEMENT)
         {
             return nullptr;
         }
@@ -263,10 +270,10 @@ namespace parser
             }
         }
 
-        GumboVector* children = &node->v.element.children;
+        const GumboVector* children = &node->v.element.children;
         for (unsigned int i = 0; i < children->length; ++i)
         {
-            GumboNode* currentResult = searchParentDivForMatch(static_cast<GumboNode*>(children->data[i]));
+            const GumboNode* currentResult = searchParentDivForMatch(static_cast<GumboNode*>(children->data[i]));
             if (currentResult != nullptr)
                 return currentResult;
         }
