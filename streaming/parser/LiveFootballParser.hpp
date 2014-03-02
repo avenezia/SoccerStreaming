@@ -26,13 +26,14 @@ namespace parser
             std::vector<website::StreamingInfo> getStreamingLinks(const std::string& matchPage);
 
         private:
-            const GumboVector* getNodesWithStreamingLinks(const GumboNode* divParentNode) const;
+            const GumboVector* getTrListWithStreamingLinks(const GumboNode* divParentNode) const;
+            std::string getTextForElement(const GumboNode* node) const;
             bool isNodeOfSpecificTypeAndTag(const GumboNode* node, GumboTag nodeTag,
                     GumboNodeType nodeType = GUMBO_NODE_ELEMENT) const;
             bool isParentOfMatchLink(const GumboNode *node) const;
             void parseMatchId(const std::string& linkToMatchPage);
-            std::vector<website::StreamingInfo> parseNodesWithStreamingLinks(const GumboVector* trElementList) const;
-            website::StreamingInfo parseNodeWithStreamingLink(const GumboNode* trElement) const;
+            website::StreamingInfo parseTrElementWithStreamingLink(const GumboNode* trElement) const;
+            std::vector<website::StreamingInfo> parseTrListWithStreamingLinks(const GumboVector* trElementList) const;
             void parsePage(const std::string& htmlPage);
             std::string searchLinkForTeamMatch(const GumboNode *node);
             const GumboNode* searchParentDivForMatch(const GumboNode* node) const;
@@ -45,7 +46,7 @@ namespace parser
             std::unique_ptr<GumboOutput, void(*)(GumboOutput*)> parseTree_;
             std::string teamName_;
 
-            enum class FieldIndex : std::uint8_t
+            enum class FieldIndex : std::uint32_t
             {
                 BITRATE = 3,
                 CHANNEL = 4,

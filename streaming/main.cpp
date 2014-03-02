@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
         //website::LiveFootballHandler handler("http://livefootball.ws/");
         //handler.getStreamingLinks(argv[1]);
         string webPage(openFile(argv[1]));
-        cout << webPage.length() << endl;
+        //cout << webPage.length() << endl;
         parser::LiveFootballParser parser;
         parser.getStreamingLinks(webPage);
     }

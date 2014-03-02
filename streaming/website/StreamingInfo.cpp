@@ -1,5 +1,6 @@
 #include "StreamingInfo.hpp"
 
+#include <iostream>
 #include <utility>
 
 namespace website
@@ -43,6 +44,7 @@ namespace website
     	return link_;
     }
 
+    // TODO: check if a version with rvalue references can be used
     void StreamingInfo::setBitRate(const std::string& bitRate)
     {
         bitRate_ = bitRate;
@@ -56,5 +58,12 @@ namespace website
     void StreamingInfo::setLink(const std::string& link)
     {
         link_ = link;
+    }
+
+    std::ostream& operator<<(std::ostream& o, const StreamingInfo& streamingInfo)
+    {
+        o << "Link " << streamingInfo.link_ << ", channel " << streamingInfo.channel_ <<
+                ", bitrate " << streamingInfo.bitRate_ << " ";
+        return o;
     }
 }

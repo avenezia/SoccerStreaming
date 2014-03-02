@@ -45,10 +45,10 @@ namespace parser
         const GumboNode* divNode = searchParentDivForMatch(parseTree_->root);
         if (divNode != nullptr)
         {
-            const GumboVector* tableRowList = getNodesWithStreamingLinks(divNode);
-            if (tableRowList != nullptr)
+            const GumboVector* trList = getTrListWithStreamingLinks(divNode);
+            if (trList != nullptr)
             {
-
+                parseTrListWithStreamingLinks(trList);
             }
             else
             {
@@ -67,7 +67,7 @@ namespace parser
     }
 
     /// The method returns the list of <tr> elements containing the information for a specific streaming
-    const GumboVector* LiveFootballParser::getNodesWithStreamingLinks(const GumboNode* divParentNode) const
+    const GumboVector* LiveFootballParser::getTrListWithStreamingLinks(const GumboNode* divParentNode) const
     {
         if (divParentNode == nullptr)
         {
@@ -108,6 +108,28 @@ namespace parser
         }
 
         return nullptr;
+    }
+
+    /// The method returns the text child of the element
+    std::string LiveFootballParser::getTextForElement(const GumboNode* node) const
+    {
+        if (node != nullptr)
+        {
+            const GumboVector* childrenList = &node->v.element.children;
+            const GumboNode* child = nullptr;
+            // Each child should be a <td> element containing some information
+            cout << "child lenght " << childrenList->length << endl;
+            for (unsigned int childIndex = 0; childIndex < childrenList->length; ++childIndex)
+            {
+                child = (GumboNode*) childrenList->data[childIndex];
+                if (child->type == GUMBO_NODE_TEXT)
+                {
+                    return child->v.text.text;
+                }
+            }
+        }
+
+        return "";
     }
 
     /// Utility method to check if the node matches a specific type and tag
@@ -162,28 +184,8 @@ namespace parser
         }
     }
 
-    /// The method parses the list of <tr> elements containing the information for the streaming
-    vector<website::StreamingInfo> LiveFootballParser::parseNodesWithStreamingLinks(const GumboVector* trElementList) const
-    {
-        vector<website::StreamingInfo> streamingLinks;
-        if (trElementList != nullptr)
-        {
-            for (unsigned int i = 0; i < trElementList->length; ++i)
-            {
-                //GumboNode* trElement = static_cast<GumboNode*>(trElementList->data[i]);
-                //streamingLinks.push_back()
-            }
-        }
-        else
-        {
-            cerr << "LiveFootballParser - The list of <tr> elements containing the streaming info is null" << endl;
-        }
-
-        return streamingLinks;
-    }
-
     // The method parses a single <tr> element containing the information for the streaming
-    website::StreamingInfo LiveFootballParser::parseNodeWithStreamingLink(const GumboNode* trElement) const
+    website::StreamingInfo LiveFootballParser::parseTrElementWithStreamingLink(const GumboNode* trElement) const
     {
         website::StreamingInfo streamingInfo;
         if (trElement != nullptr)
@@ -196,8 +198,18 @@ namespace parser
                 trChild = static_cast<GumboNode*>(trChildrenList->data[tdIndex]);
                 if (isNodeOfSpecificTypeAndTag(trChild, GUMBO_TAG_TD))
                 {
+                    //TODO: The cast is ugly: check if a better solution can be found
+                    if (tdIndex == static_cast<unsigned int>(LiveFootballParser::FieldIndex::BITRATE))
+                    {
+                        streamingInfo.setBitRate(getTextForElement(trChild));
+                    }
+                    else if (tdIndex == static_cast<unsigned int>(LiveFootballParser::FieldIndex::CHANNEL))
+                    {
+                        streamingInfo.setChannel(getTextForElement(trChild));
+                    }
                 }
             }
+            cout << streamingInfo << endl;
         }
         else
         {
@@ -205,6 +217,27 @@ namespace parser
         }
 
         return streamingInfo;
+    }
+
+    /// The method parses the list of <tr> elements containing the information for the streaming
+    vector<website::StreamingInfo> LiveFootballParser::parseTrListWithStreamingLinks(const GumboVector* trElementList) const
+    {
+        vector<website::StreamingInfo> streamingLinks;
+        if (trElementList != nullptr)
+        {
+            for (unsigned int trIndex = 1; trIndex < trElementList->length; ++trIndex)
+            {
+                GumboNode* trElement = static_cast<GumboNode*>(trElementList->data[trIndex]);
+                parseTrElementWithStreamingLink(trElement);
+                //streamingLinks.push_back()
+            }
+        }
+        else
+        {
+            cerr << "LiveFootballParser - The list of <tr> elements containing the streaming info is null" << endl;
+        }
+
+        return streamingLinks;
     }
 
     void LiveFootballParser::parsePage(const string& htmlPage)

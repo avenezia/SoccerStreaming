@@ -1,6 +1,7 @@
 #ifndef STREAMING_INFO_HPP
 #define STREAMING_INFO_HPP
 
+#include <iosfwd>
 #include <string>
 
 namespace website
@@ -20,6 +21,8 @@ namespace website
             void setBitRate(const std::string& bitRate);
             void setChannel(const std::string& channel);
             void setLink(const std::string& link);
+
+            friend std::ostream& operator<<(std::ostream& o, const StreamingInfo& streamingInfo);
 
         private:
             std::string link_;
