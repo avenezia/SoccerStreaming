@@ -3,6 +3,7 @@
 #include <boost/regex.hpp>
 #include <cstring>
 #include <string>
+#include <utility>
 #include <vector>
 using namespace std;
 
@@ -19,7 +20,7 @@ namespace parser
     const int LiveFootballParser::kLinkTableIndex = 2;
 
     LiveFootballParser::LiveFootballParser():
-        matchId_("3227"),
+        matchId_(""),
         parseTree_(nullptr, gumboPtrDeleter),
         teamName_("")
     {
@@ -39,31 +40,32 @@ namespace parser
         return searchLinkForTeamMatch(parseTree_->root);
     }
 
+    /// The method returns the list of StreamingInfo object containing the information parse from the web page
     vector<website::StreamingInfo> LiveFootballParser::getStreamingLinks(const string& matchPage)
     {
+        vector<website::StreamingInfo> streamingInfoContainer;
         parsePage(matchPage);
+        // Searching by id the div that contains the useful information
         const GumboNode* divNode = searchParentDivForMatch(parseTree_->root);
         if (divNode != nullptr)
         {
+            // Getting the list of tr elements containing the links
             const GumboVector* trList = getTrListWithStreamingLinks(divNode);
             if (trList != nullptr)
             {
-                parseTrListWithStreamingLinks(trList);
+                streamingInfoContainer = parseTrListWithStreamingLinks(trList);
             }
             else
             {
-                //TODO: remove me
-                cerr << "Error while searching tbody" << endl;
+                cerr << "LiveFootballParser - unable to find the tr elements containing links" << endl;
             }
         }
         else
         {
-            //TODO: remove me
-            cerr << "Error while searching div" << endl;
+            cerr << "LiveFootballParser - unable to find the container div" << endl;
         }
 
-        vector<website::StreamingInfo> result;
-        return result;
+        return streamingInfoContainer;
     }
 
     /// The method returns the list of <tr> elements containing the information for a specific streaming
@@ -183,6 +185,39 @@ namespace parser
         }
     }
 
+    string LiveFootballParser::parseTdContainingLink(const GumboNode* tdElement) const
+    {
+        if (tdElement != nullptr)
+        {
+            const GumboVector* tdChildrenList = &tdElement->v.element.children;
+            const GumboNode* tdChild = nullptr;
+            // We are looking for the a element that has the link to the streaming
+            // in the href attribute
+            for (unsigned int childIndex = 0; childIndex < tdChildrenList->length; ++childIndex)
+            {
+                tdChild = static_cast<GumboNode*>(tdChildrenList->data[childIndex]);
+                if (isNodeOfSpecificTypeAndTag(tdChild, GUMBO_TAG_A))
+                {
+                    GumboAttribute* hrefAttribute = gumbo_get_attribute(&tdChild->v.element.attributes, "href");
+                    if (hrefAttribute != nullptr)
+                    {
+                        return hrefAttribute->value;
+                    }
+                    else
+                    {
+                        cerr << "LiveFootballParser - The a element containing the link has not href attribute" << endl;
+                    }
+                }
+            }
+        }
+        else
+        {
+            cerr << "LiveFootballParser - The <td> element containing the link is null" << endl;
+        }
+
+        return "";
+    }
+
     // The method parses a single <tr> element containing the information for the streaming
     website::StreamingInfo LiveFootballParser::parseTrElementWithStreamingLink(const GumboNode* trElement) const
     {
@@ -207,9 +242,12 @@ namespace parser
                         // TODO: need the conversion from Windows-1251 to utf8
                         streamingInfo.setChannel(getTextForElement(trChild));
                     }
+                    else if (tdIndex == static_cast<unsigned int>(LiveFootballParser::FieldIndex::LINK))
+                    {
+                        streamingInfo.setLink(parseTdContainingLink(trChild));
+                    }
                 }
             }
-            cout << streamingInfo << endl;
         }
         else
         {
@@ -220,16 +258,19 @@ namespace parser
     }
 
     /// The method parses the list of <tr> elements containing the information for the streaming
+    /// and this information is grouped in StreamingInfo objects
     vector<website::StreamingInfo> LiveFootballParser::parseTrListWithStreamingLinks(const GumboVector* trElementList) const
     {
         vector<website::StreamingInfo> streamingLinks;
         if (trElementList != nullptr)
         {
+            // Starting with trIndex = 1 because the first one (0) is the header of the table!
+            // The site should use th instead of this ugly solution...
             for (unsigned int trIndex = 1; trIndex < trElementList->length; ++trIndex)
             {
                 GumboNode* trElement = static_cast<GumboNode*>(trElementList->data[trIndex]);
-                parseTrElementWithStreamingLink(trElement);
-                //streamingLinks.push_back()
+                // adding a StreamingInfo object for each row; using move semantics
+                streamingLinks.push_back(parseTrElementWithStreamingLink(trElement));
             }
         }
         else

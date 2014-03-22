@@ -16,10 +16,13 @@ namespace network
             virtual ~HttpHandler() {};
             
             virtual HttpResponse getRequest(const std::string& requestUri,
-                const std::vector<std::pair<std::string, std::string>>& headerList) = 0;
+                const std::vector<std::pair<std::string, std::string>>& headerList,
+                bool withAbsolutePath = false) = 0;
             virtual HttpResponse getRequest(const std::string& requestUri,
-                const std::pair<std::string, std::string>& singleHeader) = 0;
-            virtual HttpResponse getRequest(const std::string& requestUri) = 0;
+                const std::pair<std::string, std::string>& singleHeader,
+                bool withAbsolutePath = false) = 0;
+            virtual HttpResponse getRequest(const std::string& requestUri,
+                bool withAbsolutePath = false) = 0;
     };
 }
 

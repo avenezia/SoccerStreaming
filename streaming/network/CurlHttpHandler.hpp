@@ -19,10 +19,13 @@ namespace network
             virtual ~CurlHttpHandler();
 
             virtual HttpResponse getRequest(const std::string& requestUri,
-                const std::vector<std::pair<std::string, std::string>>& headers);
+                const std::vector<std::pair<std::string, std::string>>& headers,
+                bool withAbsolutePath = false);
             virtual HttpResponse getRequest(const std::string& requestUri,
-                const std::pair<std::string, std::string>& singleHeader);
-            virtual HttpResponse getRequest(const std::string& requestUri);
+                const std::pair<std::string, std::string>& singleHeader,
+                bool withAbsolutePath = false);
+            virtual HttpResponse getRequest(const std::string& requestUri,
+                bool withAbsolutePath = false);
 
         private:
             std::string hostnameUrl_;

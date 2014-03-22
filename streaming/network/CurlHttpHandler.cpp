@@ -27,7 +27,8 @@ namespace network
     }
 
     HttpResponse CurlHttpHandler::getRequest(const std::string& requestUri,
-        const std::vector<std::pair<std::string, std::string>>& headers)
+        const std::vector<std::pair<std::string, std::string>>& headers,
+        bool withAbsolutePath)
     {
         std::list<std::string> headerList;
         // Converting the headers in the Curl format taking a list of strings in the form key:value
@@ -39,7 +40,17 @@ namespace network
         // in order to be more efficient
         std::stringstream responseStream;
         requestHandler_.setOpt(httpHeaders);
-        requestHandler_.setOpt(curlpp::options::Url(hostnameUrl_ + requestUri));
+        if (!withAbsolutePath)
+        {
+            // Making a request considering requestUri as a relative path to the hostname
+            requestHandler_.setOpt(curlpp::options::Url(hostnameUrl_ + requestUri));
+        }
+        else
+        {
+            // Making a request considering requestUri as an absolute path for the hostname
+            // TODO: In this case a check on the domain is performed
+            requestHandler_.setOpt(curlpp::options::Url(requestUri));
+        }
         // The response will be written in the stringstream
         requestHandler_.setOpt(curlpp::options::WriteStream(&responseStream));
         requestHandler_.perform();
@@ -52,17 +63,19 @@ namespace network
     }
 
     HttpResponse CurlHttpHandler::getRequest(const std::string& requestUri,
-        const std::pair<std::string, std::string>& singleHeader)
+        const std::pair<std::string, std::string>& singleHeader,
+        bool withAbsolutePath)
     {
         std::vector<std::pair<std::string, std::string>> v;
         v.push_back(singleHeader);
-        return getRequest(requestUri, v);
+        return getRequest(requestUri, v, withAbsolutePath);
     }
 
-    HttpResponse CurlHttpHandler::getRequest(const std::string& requestUri)
+    HttpResponse CurlHttpHandler::getRequest(const std::string& requestUri,
+        bool withAbsolutePath)
     {
         std::vector<std::pair<std::string, std::string>> v;
-        return getRequest(requestUri, v);
+        return getRequest(requestUri, v, withAbsolutePath);
     }
 }
 

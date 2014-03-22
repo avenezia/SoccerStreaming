@@ -26,8 +26,11 @@ namespace website
         private:
             static const boost::regex kAccessCookieRegExp;
 
+            std::string getMatchPage(const std::string& matchPageLink) const;
             std::string getRealHomePage() const;
             std::string parseAccessCookie(const std::string& webPage) const;
+            std::string performHttpRequest(const std::string& pageUrl,
+                    bool withAbsolutePath = false) const;
             void setAccessCookieFromHomePage();
 
             // It seems that a common interface for different parsers is not easy

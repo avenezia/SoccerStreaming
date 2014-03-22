@@ -29,6 +29,14 @@ namespace website
 
     }
 
+    StreamingInfo& StreamingInfo::operator=(StreamingInfo&& s)
+    {
+        link_ = std::move(s.link_);
+        channel_ = std::move(s.channel_);
+        bitRate_ = std::move(s.bitRate_);
+        return *this;
+    }
+
     const std::string& StreamingInfo::getBitRate() const
     {
     	return bitRate_;
@@ -44,20 +52,19 @@ namespace website
     	return link_;
     }
 
-    // TODO: check if a version with rvalue references can be used
-    void StreamingInfo::setBitRate(const std::string& bitRate)
+    void StreamingInfo::setBitRate(std::string&& bitRate)
     {
-        bitRate_ = bitRate;
+        bitRate_ = std::move(bitRate);
     }
 
-    void StreamingInfo::setChannel(const std::string& channel)
+    void StreamingInfo::setChannel(std::string&& channel)
     {
-        channel_ = channel;
+        channel_ = std::move(channel);
     }
 
-    void StreamingInfo::setLink(const std::string& link)
+    void StreamingInfo::setLink(std::string&& link)
     {
-        link_ = link;
+        link_ = std::move(link);
     }
 
     std::ostream& operator<<(std::ostream& o, const StreamingInfo& streamingInfo)

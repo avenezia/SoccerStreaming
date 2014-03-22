@@ -34,6 +34,7 @@ namespace parser
             bool isParentOfMatchLink(const GumboNode *node) const;
 
             void parseMatchId(const std::string& linkToMatchPage);
+            std::string parseTdContainingLink(const GumboNode* tdElement) const;
             website::StreamingInfo parseTrElementWithStreamingLink(const GumboNode* trElement) const;
             std::vector<website::StreamingInfo> parseTrListWithStreamingLinks(const GumboVector* trElementList) const;
             void parsePage(const std::string& htmlPage);

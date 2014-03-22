@@ -52,9 +52,21 @@ int main(int argc, char *argv[])
     {
         //website::LiveFootballHandler handler("http://livefootball.ws/");
         //handler.getStreamingLinks(argv[1]);
+
         string webPage(openFile(argv[1]));
         //cout << webPage.length() << endl;
         parser::LiveFootballParser parser;
-        parser.getStreamingLinks(webPage);
+        auto v = parser.getStreamingLinks(webPage);
+        for (auto i = v.begin(); i != v.end();++i)
+        {
+            cout << *i << endl;
+        }
+        /*
+        website::LiveFootballHandler handler("http://livefootball.ws/");
+        auto v = handler.getStreamingLinks(argv[1]);
+        for (auto i = v.begin(); i != v.end();++i)
+        {
+            cout << *i << endl;
+        }*/
     }
 }
