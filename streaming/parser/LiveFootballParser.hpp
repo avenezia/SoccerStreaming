@@ -28,13 +28,16 @@ namespace parser
         private:
             const GumboVector* getTrListWithStreamingLinks(const GumboNode* divParentNode) const;
             std::string getTextForElement(const GumboNode* node) const;
+
             bool isNodeOfSpecificTypeAndTag(const GumboNode* node, GumboTag nodeTag,
                     GumboNodeType nodeType = GUMBO_NODE_ELEMENT) const;
             bool isParentOfMatchLink(const GumboNode *node) const;
+
             void parseMatchId(const std::string& linkToMatchPage);
             website::StreamingInfo parseTrElementWithStreamingLink(const GumboNode* trElement) const;
             std::vector<website::StreamingInfo> parseTrListWithStreamingLinks(const GumboVector* trElementList) const;
             void parsePage(const std::string& htmlPage);
+
             std::string searchLinkForTeamMatch(const GumboNode *node);
             const GumboNode* searchParentDivForMatch(const GumboNode* node) const;
 
@@ -57,4 +60,4 @@ namespace parser
     void gumboPtrDeleter(GumboOutput *gumboPtr);
 }
 
-#endif /* LIVEFOOTBALLPARSE_HPP_ */
+#endif /* LIVEFOOTBALLPARSER_HPP_ */

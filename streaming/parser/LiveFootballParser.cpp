@@ -19,7 +19,7 @@ namespace parser
     const int LiveFootballParser::kLinkTableIndex = 2;
 
     LiveFootballParser::LiveFootballParser():
-        matchId_(""),
+        matchId_("3227"),
         parseTree_(nullptr, gumboPtrDeleter),
         teamName_("")
     {
@@ -118,7 +118,6 @@ namespace parser
             const GumboVector* childrenList = &node->v.element.children;
             const GumboNode* child = nullptr;
             // Each child should be a <td> element containing some information
-            cout << "child lenght " << childrenList->length << endl;
             for (unsigned int childIndex = 0; childIndex < childrenList->length; ++childIndex)
             {
                 child = (GumboNode*) childrenList->data[childIndex];
@@ -205,6 +204,7 @@ namespace parser
                     }
                     else if (tdIndex == static_cast<unsigned int>(LiveFootballParser::FieldIndex::CHANNEL))
                     {
+                        // TODO: need the conversion from Windows-1251 to utf8
                         streamingInfo.setChannel(getTextForElement(trChild));
                     }
                 }
