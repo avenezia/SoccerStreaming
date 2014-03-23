@@ -8,6 +8,7 @@
 using namespace std;
 
 #include "gumbo.h"
+#include "ParserUtils.hpp"
 #include "StreamingInfo.hpp"
 
 namespace parser
@@ -45,8 +46,8 @@ namespace parser
     {
         vector<website::StreamingInfo> streamingInfoContainer;
         parsePage(matchPage);
-        // Searching by id the div that contains the useful information
-        const GumboNode* divNode = searchParentDivForMatch(parseTree_->root);
+        // Searching the div that contains the useful information: it has the id equal to the id of the match
+        const GumboNode* divNode = ParserUtils::getElementById(parseTree_->root, GUMBO_TAG_DIV, matchId_);
         if (divNode != nullptr)
         {
             // Getting the list of tr elements containing the links
@@ -342,35 +343,6 @@ namespace parser
         }
 
         return "";
-    }
-
-    /// This method looks for the div (addressable by id) inside the web page
-    /// containing the details of the streaming for one specific match
-    const GumboNode* LiveFootballParser::searchParentDivForMatch(const GumboNode* node) const
-    {
-        if (node == nullptr || node->type != GUMBO_NODE_ELEMENT)
-        {
-            return nullptr;
-        }
-
-        if (node->v.element.tag == GUMBO_TAG_DIV)
-        {
-            const GumboAttribute* id = gumbo_get_attribute(&node->v.element.attributes, "id");
-            if (id != nullptr && strstr(id->value, matchId_.c_str()) != nullptr)
-            {
-                return node;
-            }
-        }
-
-        const GumboVector* children = &node->v.element.children;
-        for (unsigned int i = 0; i < children->length; ++i)
-        {
-            const GumboNode* currentResult = searchParentDivForMatch(static_cast<GumboNode*>(children->data[i]));
-            if (currentResult != nullptr)
-                return currentResult;
-        }
-
-        return nullptr;
     }
 
     void gumboPtrDeleter(GumboOutput *gumboPtr)

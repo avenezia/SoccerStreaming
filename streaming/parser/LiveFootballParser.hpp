@@ -40,7 +40,6 @@ namespace parser
             void parsePage(const std::string& htmlPage);
 
             std::string searchLinkForTeamMatch(const GumboNode *node);
-            const GumboNode* searchParentDivForMatch(const GumboNode* node) const;
 
             static const boost::regex kMatchIdRegExp;
             static const std::string kSpanClassValue;

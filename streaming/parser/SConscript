@@ -4,7 +4,7 @@ env.Append(CPPFLAGS = compilerFlags)
 
 env.Append(CPPPATH = ["../website"])
 
-sourceFiles = ["LiveFootballParser.cpp"]
+sourceFiles = ["LiveFootballParser.cpp", "ParserUtils.cpp"]
 objects = []
 
 for sourceFile in sourceFiles:
