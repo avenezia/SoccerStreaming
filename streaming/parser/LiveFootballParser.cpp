@@ -163,7 +163,7 @@ namespace parser
     {
         if (isNodeOfSpecificTypeAndTag(node, GUMBO_TAG_SPAN))
         {
-            GumboAttribute* classAttribute;
+            const GumboAttribute* classAttribute;
             if ((classAttribute = gumbo_get_attribute(&node->v.element.attributes, "class")) &&
                 strstr(classAttribute->value, kSpanClassValue.c_str()) != nullptr)
             {
@@ -204,7 +204,7 @@ namespace parser
                 tdChild = static_cast<GumboNode*>(tdChildrenList->data[childIndex]);
                 if (isNodeOfSpecificTypeAndTag(tdChild, GUMBO_TAG_A))
                 {
-                    GumboAttribute* hrefAttribute = gumbo_get_attribute(&tdChild->v.element.attributes, "href");
+                    const GumboAttribute* hrefAttribute = gumbo_get_attribute(&tdChild->v.element.attributes, "href");
                     if (hrefAttribute != nullptr)
                     {
                         return hrefAttribute->value;
@@ -315,7 +315,7 @@ namespace parser
         // The links we are interested in are the ones that are children of
         // span elements with class equal to the value in kSpanClassValue variable
         // (Currently argr_custom). Following jquery notation, it is $("span.argr_custom a")
-        GumboAttribute* href;
+        const GumboAttribute* href;
         if (node->v.element.tag == GUMBO_TAG_A &&
             (href = gumbo_get_attribute(&node->v.element.attributes, "href")) &&
             isParentOfMatchLink(node->parent))
@@ -355,7 +355,7 @@ namespace parser
 
         if (node->v.element.tag == GUMBO_TAG_DIV)
         {
-            GumboAttribute* id = gumbo_get_attribute(&node->v.element.attributes, "id");
+            const GumboAttribute* id = gumbo_get_attribute(&node->v.element.attributes, "id");
             if (id != nullptr && strstr(id->value, matchId_.c_str()) != nullptr)
             {
                 return node;
