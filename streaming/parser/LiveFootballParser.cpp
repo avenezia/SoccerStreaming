@@ -91,7 +91,9 @@ namespace parser
             }
         }
 
-        if (divChild != nullptr && tableCounter == kLinkTableIndex)
+        if (divChild != nullptr &&
+            isNodeOfSpecificTypeAndTag(divChild, GUMBO_TAG_TABLE) &&
+            tableCounter == kLinkTableIndex)
         {
             // divChild is the table containing the <tr> elements with the
             // links to the streaming: <table><tbody><tr></tr><tr></tr></tbody></table>
@@ -107,6 +109,10 @@ namespace parser
                     return &tableChild->v.element.children;
                 }
             }
+        }
+        else
+        {
+            cerr << "LiveFootballParser - error while searching table with streaming data" << endl;
         }
 
         return nullptr;
@@ -264,13 +270,25 @@ namespace parser
         vector<website::StreamingInfo> streamingLinks;
         if (trElementList != nullptr)
         {
-            // Starting with trIndex = 1 because the first one (0) is the header of the table!
-            // The site should use th instead of this ugly solution...
-            for (unsigned int trIndex = 1; trIndex < trElementList->length; ++trIndex)
+            // The number of tr elements encountered, useful to skip the first one that
+            // doesn't contain information but is the header of the table (why they don't use th?)
+            int trCount = 0;
+            for (unsigned int trIndex = 0; trIndex < trElementList->length; ++trIndex)
             {
                 GumboNode* trElement = static_cast<GumboNode*>(trElementList->data[trIndex]);
-                // adding a StreamingInfo object for each row; using move semantics
-                streamingLinks.push_back(parseTrElementWithStreamingLink(trElement));
+                // We have to perform the check on tr element because there could be other
+                // spurious elements in the children list
+                if (isNodeOfSpecificTypeAndTag(trElement, GUMBO_TAG_TR))
+                {
+                    if (trCount > 0)
+                    {
+                        // Starting to parse only from the second tr because the first one is the
+                        // header of the table! The site should use th instead of this ugly solution
+                        // Adding a StreamingInfo object for each row; using move semantics
+                        streamingLinks.push_back(move(parseTrElementWithStreamingLink(trElement)));
+                    }
+                    ++trCount;
+                }
             }
         }
         else
