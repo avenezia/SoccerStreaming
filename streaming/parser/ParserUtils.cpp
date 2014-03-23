@@ -34,4 +34,18 @@ namespace parser
 
         return nullptr;
     }
+
+    bool ParserUtils::isNodeOfTypeAndTag(const GumboNode* node,
+            GumboTag nodeTag,
+            GumboNodeType nodeType)
+    {
+        if (node != nullptr &&
+            node->type == nodeType &&
+            node->v.element.tag == nodeTag)
+        {
+            return true;
+        }
+
+        return false;
+    }
 }

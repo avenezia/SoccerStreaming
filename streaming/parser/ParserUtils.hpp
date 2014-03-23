@@ -12,6 +12,9 @@ namespace parser
             static const GumboNode* getElementById(const GumboNode* node,
                     GumboTag elementTag,
                     const std::string& idValue);
+            static bool isNodeOfTypeAndTag(const GumboNode* node,
+                    GumboTag nodeTag,
+                    GumboNodeType nodeType = GUMBO_NODE_ELEMENT);
     };
 }
 #endif /* PARSER_UTILS_HPP_ */

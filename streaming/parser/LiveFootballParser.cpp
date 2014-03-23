@@ -86,14 +86,14 @@ namespace parser
         {
             divChild = static_cast<GumboNode*>(divChildrenList->data[i]);
 
-            if (isNodeOfSpecificTypeAndTag(divChild, GUMBO_TAG_TABLE))
+            if (ParserUtils::isNodeOfTypeAndTag(divChild, GUMBO_TAG_TABLE))
             {
                 ++tableCounter;
             }
         }
 
         if (divChild != nullptr &&
-            isNodeOfSpecificTypeAndTag(divChild, GUMBO_TAG_TABLE) &&
+            ParserUtils::isNodeOfTypeAndTag(divChild, GUMBO_TAG_TABLE) &&
             tableCounter == kLinkTableIndex)
         {
             // divChild is the table containing the <tr> elements with the
@@ -105,7 +105,7 @@ namespace parser
             for (unsigned int i = 0; i < tableChildrenList->length; ++i)
             {
                 tableChild = static_cast<GumboNode*>(tableChildrenList->data[i]);
-                if (isNodeOfSpecificTypeAndTag(tableChild, GUMBO_TAG_TBODY))
+                if (ParserUtils::isNodeOfTypeAndTag(tableChild, GUMBO_TAG_TBODY))
                 {
                     return &tableChild->v.element.children;
                 }
@@ -140,20 +140,6 @@ namespace parser
         return "";
     }
 
-    /// Utility method to check if the node matches a specific type and tag
-    bool LiveFootballParser::isNodeOfSpecificTypeAndTag(const GumboNode* node, GumboTag nodeTag,
-            GumboNodeType nodeType) const
-    {
-        if (node != nullptr &&
-            node->type == nodeType &&
-            node->v.element.tag == nodeTag)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
     /// Utility method to check if the node can be the <span> parent of the <a>
     /// element containing the link for the match
     /// For example
@@ -162,7 +148,7 @@ namespace parser
     /// </span>
     bool LiveFootballParser::isParentOfMatchLink(const GumboNode *node) const
     {
-        if (isNodeOfSpecificTypeAndTag(node, GUMBO_TAG_SPAN))
+        if (ParserUtils::isNodeOfTypeAndTag(node, GUMBO_TAG_SPAN))
         {
             const GumboAttribute* classAttribute;
             if ((classAttribute = gumbo_get_attribute(&node->v.element.attributes, "class")) &&
@@ -203,7 +189,7 @@ namespace parser
             for (unsigned int childIndex = 0; childIndex < tdChildrenList->length; ++childIndex)
             {
                 tdChild = static_cast<GumboNode*>(tdChildrenList->data[childIndex]);
-                if (isNodeOfSpecificTypeAndTag(tdChild, GUMBO_TAG_A))
+                if (ParserUtils::isNodeOfTypeAndTag(tdChild, GUMBO_TAG_A))
                 {
                     const GumboAttribute* hrefAttribute = gumbo_get_attribute(&tdChild->v.element.attributes, "href");
                     if (hrefAttribute != nullptr)
@@ -237,7 +223,7 @@ namespace parser
             for (unsigned int tdIndex = 0; tdIndex < trChildrenList->length; ++tdIndex)
             {
                 trChild = static_cast<GumboNode*>(trChildrenList->data[tdIndex]);
-                if (isNodeOfSpecificTypeAndTag(trChild, GUMBO_TAG_TD))
+                if (ParserUtils::isNodeOfTypeAndTag(trChild, GUMBO_TAG_TD))
                 {
                     //TODO: The cast is ugly: check if a better solution can be found
                     if (tdIndex == static_cast<unsigned int>(LiveFootballParser::FieldIndex::BITRATE))
@@ -279,7 +265,7 @@ namespace parser
                 GumboNode* trElement = static_cast<GumboNode*>(trElementList->data[trIndex]);
                 // We have to perform the check on tr element because there could be other
                 // spurious elements in the children list
-                if (isNodeOfSpecificTypeAndTag(trElement, GUMBO_TAG_TR))
+                if (ParserUtils::isNodeOfTypeAndTag(trElement, GUMBO_TAG_TR))
                 {
                     if (trCount > 0)
                     {

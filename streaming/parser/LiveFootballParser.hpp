@@ -29,8 +29,6 @@ namespace parser
             const GumboVector* getTrListWithStreamingLinks(const GumboNode* divParentNode) const;
             std::string getTextForElement(const GumboNode* node) const;
 
-            bool isNodeOfSpecificTypeAndTag(const GumboNode* node, GumboTag nodeTag,
-                    GumboNodeType nodeType = GUMBO_NODE_ELEMENT) const;
             bool isParentOfMatchLink(const GumboNode *node) const;
 
             void parseMatchId(const std::string& linkToMatchPage);
