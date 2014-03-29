@@ -13,6 +13,8 @@ using namespace std;
 
 namespace parser
 {
+    // The prefix of the value of the id for the div containing links
+    const std::string LiveFootballParser::kContainerDivIdPrefix("news-id-");
     // The regular expression used to get the id of a match in a link
     const boost::regex LiveFootballParser::kMatchIdRegExp("(/)([0-9]+)(-)");
     // The value of the class attribute of the span element, parent of the links
@@ -46,8 +48,9 @@ namespace parser
     {
         vector<website::StreamingInfo> streamingInfoContainer;
         parsePage(matchPage);
-        // Searching the div that contains the useful information: it has the id equal to the id of the match
-        const GumboNode* divNode = ParserUtils::getElementById(parseTree_->root, GUMBO_TAG_DIV, matchId_);
+        // Searching the div that contains the useful information: its id is composed by a prefix and the matchId
+        const GumboNode* divNode = ParserUtils::getElementById(parseTree_->root, GUMBO_TAG_DIV,
+                kContainerDivIdPrefix + matchId_);
         if (divNode != nullptr)
         {
             // Getting the list of tr elements containing the links
@@ -119,27 +122,6 @@ namespace parser
         return nullptr;
     }
 
-    /// The method returns the text child of the element
-    std::string LiveFootballParser::getTextForElement(const GumboNode* node) const
-    {
-        if (node != nullptr)
-        {
-            const GumboVector* childrenList = &node->v.element.children;
-            const GumboNode* child = nullptr;
-            // Each child should be a <td> element containing some information
-            for (unsigned int childIndex = 0; childIndex < childrenList->length; ++childIndex)
-            {
-                child = (GumboNode*) childrenList->data[childIndex];
-                if (child->type == GUMBO_NODE_TEXT)
-                {
-                    return child->v.text.text;
-                }
-            }
-        }
-
-        return "";
-    }
-
     /// Utility method to check if the node can be the <span> parent of the <a>
     /// element containing the link for the match
     /// For example
@@ -150,9 +132,9 @@ namespace parser
     {
         if (ParserUtils::isNodeOfTypeAndTag(node, GUMBO_TAG_SPAN))
         {
-            const GumboAttribute* classAttribute;
-            if ((classAttribute = gumbo_get_attribute(&node->v.element.attributes, "class")) &&
-                strstr(classAttribute->value, kSpanClassValue.c_str()) != nullptr)
+            // Using find and not operator== because the class can be composed of several values
+            // separated by spaces
+            if (ParserUtils::getAttribute(node, "class").find(kSpanClassValue.c_str()) != string::npos)
             {
                 return true;
             }
@@ -191,10 +173,9 @@ namespace parser
                 tdChild = static_cast<GumboNode*>(tdChildrenList->data[childIndex]);
                 if (ParserUtils::isNodeOfTypeAndTag(tdChild, GUMBO_TAG_A))
                 {
-                    const GumboAttribute* hrefAttribute = gumbo_get_attribute(&tdChild->v.element.attributes, "href");
-                    if (hrefAttribute != nullptr)
+                    if (ParserUtils::hasAttribute(tdChild, "href"))
                     {
-                        return hrefAttribute->value;
+                        return ParserUtils::getAttribute(tdChild, "href");
                     }
                     else
                     {
@@ -228,12 +209,12 @@ namespace parser
                     //TODO: The cast is ugly: check if a better solution can be found
                     if (tdIndex == static_cast<unsigned int>(LiveFootballParser::FieldIndex::BITRATE))
                     {
-                        streamingInfo.setBitRate(getTextForElement(trChild));
+                        streamingInfo.setBitRate(ParserUtils::getTextForElement(trChild));
                     }
                     else if (tdIndex == static_cast<unsigned int>(LiveFootballParser::FieldIndex::CHANNEL))
                     {
                         // TODO: need the conversion from Windows-1251 to utf8
-                        streamingInfo.setChannel(getTextForElement(trChild));
+                        streamingInfo.setChannel(ParserUtils::getTextForElement(trChild));
                     }
                     else if (tdIndex == static_cast<unsigned int>(LiveFootballParser::FieldIndex::LINK))
                     {
@@ -302,15 +283,14 @@ namespace parser
         // The links we are interested in are the ones that are children of
         // span elements with class equal to the value in kSpanClassValue variable
         // (Currently argr_custom). Following jquery notation, it is $("span.argr_custom a")
-        const GumboAttribute* href;
         if (node->v.element.tag == GUMBO_TAG_A &&
-            (href = gumbo_get_attribute(&node->v.element.attributes, "href")) &&
+            ParserUtils::hasAttribute(node, "href") &&
             isParentOfMatchLink(node->parent))
         {
+            string linkOfMatch = ParserUtils::getAttribute(node, "href");
             // Checking if the link contains the name of the team
-            if (strstr(href->value, teamName_.c_str()) != nullptr)
+            if (linkOfMatch.find(teamName_) != string::npos)
             {
-                string linkOfMatch(href->value);
                 // Storing the id of the match in order to use it when parsing
                 // the page with the information on the streaming of the match
                 parseMatchId(linkOfMatch);
@@ -329,13 +309,5 @@ namespace parser
         }
 
         return "";
-    }
-
-    void gumboPtrDeleter(GumboOutput *gumboPtr)
-    {
-        if (gumboPtr != nullptr)
-        {
-            gumbo_destroy_output(&kGumboDefaultOptions, gumboPtr);
-        }
     }
 }

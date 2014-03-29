@@ -1,5 +1,7 @@
 #include <curlpp/cURLpp.hpp>
 
+#include "CurlHttpHandler.hpp"
+#include "HttpResponse.hpp"
 #include "LiveFootballHandler.hpp"
 
 #include <fstream>
@@ -28,8 +30,15 @@ string openFile(const std::string& fileName)
     return result;
 }
 
+void test()
+{
+    network::CurlHttpHandler c("http://www.rojadirecta.me/");
+    cout << c.getRequest("/").getBody();
+}
+
 int main(int argc, char *argv[])
 {
+    //test();
     if (argc == 2)
     {
         cURLpp::initialize();
