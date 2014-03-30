@@ -1,7 +1,8 @@
 #include <curlpp/cURLpp.hpp>
 
-#include "CurlHttpHandler.hpp"
-#include "HttpResponse.hpp"
+//#include "CurlHttpHandler.hpp"
+//#include "HttpResponse.hpp"
+#include "RojaDirectaParser.hpp"
 #include "LiveFootballHandler.hpp"
 
 #include <fstream>
@@ -30,16 +31,19 @@ string openFile(const std::string& fileName)
     return result;
 }
 
-void test()
+void test(char *argv[])
 {
-    network::CurlHttpHandler c("http://www.rojadirecta.me/");
-    cout << c.getRequest("/").getBody();
+    //network::CurlHttpHandler c("http://www.rojadirecta.me/");
+    //cout << c.getRequest("/").getBody();
+    parser::RojaDirectaParser p;
+    p.getStreamingLinks(openFile(argv[1]), argv[2]);
 }
 
 int main(int argc, char *argv[])
 {
-    //test();
-    if (argc == 2)
+    if (argc == 3)
+        test(argv);
+    else if (argc == 2)
     {
         cURLpp::initialize();
         website::LiveFootballHandler handler("http://livefootball.ws/");

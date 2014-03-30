@@ -20,12 +20,26 @@ namespace parser
             RojaDirectaParser();
             ~RojaDirectaParser();
 
-            std::vector<website::StreamingInfo> getStreamingLinks(const std::string& matchPage);
+            std::vector<website::StreamingInfo> getStreamingLinks(const std::string& homePage,
+                    const std::string& team);
 
         private:
-            static const std::string kContainerDivId;
+            enum class FieldIndex : std::uint32_t
+            {
+                BITRATE = 4,
+                CHANNEL = 1,
+                LINK = 5
+            };
 
+            static const std::string kContainerDivId;
+            static const std::string kSpanClass;
+            static const std::string kTableDivId;
+
+            bool isSpanForTeam(const GumboNode* spanElement, const std::string& team) const;
             void parsePage(const std::string& htmlPage);
+            void parseSpanElement(const GumboNode* spanElement,
+                    std::vector<website::StreamingInfo>& resultContainer) const;
+            void parseTrElement(const GumboNode* trElement) const;
 
             std::unique_ptr<GumboOutput, void(*)(GumboOutput*)> parseTree_;
             std::string teamName_;
