@@ -28,9 +28,9 @@ namespace parser
         private:
             enum class FieldIndex : std::uint32_t
             {
-                BITRATE = 7,
-                CHANNEL = 9,
-                LINK = 15
+                BITRATE = 3,
+                CHANNEL = 4,
+                LINK = 7
             };
 
             static const std::string kContainerDivIdPrefix;

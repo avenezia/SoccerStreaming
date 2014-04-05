@@ -3,10 +3,12 @@
 #include <cassert>
 #include <cstring>
 #include <string>
+#include <vector>
+using namespace std;
 
 namespace parser
 {
-    std::string ParserUtils::getAttribute(const GumboNode* node, const std::string& attributeName)
+    string ParserUtils::getAttribute(const GumboNode* node, const string& attributeName)
     {
         assert(node != nullptr);
         const GumboAttribute* nodeAttribute = gumbo_get_attribute(&node->v.element.attributes, attributeName.c_str());
@@ -18,9 +20,26 @@ namespace parser
         return "";
     }
 
+    vector<const GumboNode*> ParserUtils::getChildrenOfTag(const GumboNode* parent, GumboTag elementTag)
+    {
+        assert(parent != nullptr);
+        vector<const GumboNode*> childrenVector;
+        const GumboVector* childrenList = &parent->v.element.children;
+        for (unsigned int childIndex = 0; childIndex < childrenList->length; ++childIndex)
+        {
+            const GumboNode* child = static_cast<GumboNode*>(childrenList->data[childIndex]);
+            if (ParserUtils::isNodeOfTypeAndTag(child, elementTag))
+            {
+                childrenVector.push_back(child);
+            }
+        }
+
+        return childrenVector;
+    }
+
     const GumboNode* ParserUtils::getElementById(const GumboNode* node,
             GumboTag elementTag,
-            const std::string& idValue)
+            const string& idValue)
     {
         if (node == nullptr || node->type != GUMBO_NODE_ELEMENT)
         {
@@ -47,8 +66,30 @@ namespace parser
         return nullptr;
     }
 
+    const GumboNode* ParserUtils::getIthChildOfTag(const GumboNode* parent, int index, GumboTag elementTag)
+    {
+        assert(parent != nullptr);
+        const GumboVector* childrenList = &parent->v.element.children;
+        // This counter keeps track only of the children for the requested tag
+        int childIndexOfTag = 0;
+        for (unsigned int childIndex = 0; childIndex < childrenList->length; ++childIndex)
+        {
+            const GumboNode* child = static_cast<GumboNode*>(childrenList->data[childIndex]);
+            if (ParserUtils::isNodeOfTypeAndTag(child, elementTag))
+            {
+                if (childIndexOfTag == index)
+                {
+                    return child;
+                }
+                ++childIndexOfTag;
+            }
+        }
+
+        return nullptr;
+    }
+
     /// The method returns the text child of the element
-    std::string ParserUtils::getTextForElement(const GumboNode* node)
+    string ParserUtils::getTextForElement(const GumboNode* node)
     {
         if (node != nullptr)
         {
@@ -67,7 +108,7 @@ namespace parser
         return "";
     }
 
-    bool ParserUtils::hasAttribute(const GumboNode* node, const std::string& attributeName)
+    bool ParserUtils::hasAttribute(const GumboNode* node, const string& attributeName)
     {
         assert(node != nullptr);
         return gumbo_get_attribute(&node->v.element.attributes, attributeName.c_str()) != nullptr;

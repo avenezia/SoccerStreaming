@@ -81,37 +81,17 @@ namespace parser
             return nullptr;
         }
 
-        const GumboVector* divChildrenList = &divParentNode->v.element.children;
-        const GumboNode* divChild = nullptr;
-        int tableCounter = 0;
-        // Looking for the second table that is the child of the divParentNode
-        for (unsigned int i = 0; i < divChildrenList->length && tableCounter < kLinkTableIndex; ++i)
+        // Looking for the second table that is the child of the divParentNode, the index is 0 based
+        const GumboNode* secondTableChildOfDiv = ParserUtils::getIthChildOfTag(divParentNode, 1, GUMBO_TAG_TABLE);
+        if (secondTableChildOfDiv != nullptr)
         {
-            divChild = static_cast<GumboNode*>(divChildrenList->data[i]);
-
-            if (ParserUtils::isNodeOfTypeAndTag(divChild, GUMBO_TAG_TABLE))
+            // This is the table containing the <tbody> with the <tr> elements
+            // containing the links to the streaming
+            const GumboNode* tbodyChildOfTable = ParserUtils::getIthChildOfTag(secondTableChildOfDiv, 0, GUMBO_TAG_TBODY);
+            if (tbodyChildOfTable != nullptr)
             {
-                ++tableCounter;
-            }
-        }
-
-        if (divChild != nullptr &&
-            ParserUtils::isNodeOfTypeAndTag(divChild, GUMBO_TAG_TABLE) &&
-            tableCounter == kLinkTableIndex)
-        {
-            // divChild is the table containing the <tr> elements with the
-            // links to the streaming: <table><tbody><tr></tr><tr></tr></tbody></table>
-            const GumboVector* tableChildrenList = &divChild->v.element.children;
-            const GumboNode* tableChild = nullptr;
-            // Looking for the tbody element in order to return its children,
-            // the tr elements containing the link for the streaming
-            for (unsigned int i = 0; i < tableChildrenList->length; ++i)
-            {
-                tableChild = static_cast<GumboNode*>(tableChildrenList->data[i]);
-                if (ParserUtils::isNodeOfTypeAndTag(tableChild, GUMBO_TAG_TBODY))
-                {
-                    return &tableChild->v.element.children;
-                }
+                // Returning the list of children, the tr elements
+                return &tbodyChildOfTable->v.element.children;
             }
         }
         else
@@ -164,29 +144,17 @@ namespace parser
     {
         if (tdElement != nullptr)
         {
-            const GumboVector* tdChildrenList = &tdElement->v.element.children;
-            const GumboNode* tdChild = nullptr;
-            // We are looking for the a element that has the link to the streaming
-            // in the href attribute
-            for (unsigned int childIndex = 0; childIndex < tdChildrenList->length; ++childIndex)
+            // Getting the a child and checking that it has the href attribute
+            const GumboNode* aChild = ParserUtils::getChildWithPredicate(tdElement, GUMBO_TAG_A,
+                    [](const GumboNode* node){ return ParserUtils::hasAttribute(node, "href");});
+            if (aChild != nullptr)
             {
-                tdChild = static_cast<GumboNode*>(tdChildrenList->data[childIndex]);
-                if (ParserUtils::isNodeOfTypeAndTag(tdChild, GUMBO_TAG_A))
-                {
-                    if (ParserUtils::hasAttribute(tdChild, "href"))
-                    {
-                        return ParserUtils::getAttribute(tdChild, "href");
-                    }
-                    else
-                    {
-                        cerr << "LiveFootballParser - The a element containing the link has not href attribute" << endl;
-                    }
-                }
+                return ParserUtils::getAttribute(aChild, "href");
             }
-        }
-        else
-        {
-            cerr << "LiveFootballParser - The <td> element containing the link is null" << endl;
+            else
+            {
+                cerr << "LiveFootballParser - The <a> element containing the link is null" << endl;
+            }
         }
 
         return "";
@@ -198,28 +166,25 @@ namespace parser
         website::StreamingInfo streamingInfo;
         if (trElement != nullptr)
         {
-            const GumboVector* trChildrenList = &trElement->v.element.children;
-            const GumboNode* trChild = nullptr;
-            // Each child should be a <td> element containing some information
-            for (unsigned int tdIndex = 0; tdIndex < trChildrenList->length; ++tdIndex)
+            // Getting the <td> elements children of the <tr>
+            std::vector<const GumboNode*> tdChildren = ParserUtils::getChildrenOfTag(trElement, GUMBO_TAG_TD);
+            // Each child is a <td> element containing some information
+            for (unsigned int tdIndex = 0; tdIndex < tdChildren.size(); ++tdIndex)
             {
-                trChild = static_cast<GumboNode*>(trChildrenList->data[tdIndex]);
-                if (ParserUtils::isNodeOfTypeAndTag(trChild, GUMBO_TAG_TD))
+                const GumboNode* tdElement = tdChildren[tdIndex];
+                //TODO: The cast is ugly: check if a better solution can be found
+                if (tdIndex == static_cast<unsigned int>(LiveFootballParser::FieldIndex::BITRATE))
                 {
-                    //TODO: The cast is ugly: check if a better solution can be found
-                    if (tdIndex == static_cast<unsigned int>(LiveFootballParser::FieldIndex::BITRATE))
-                    {
-                        streamingInfo.setBitRate(ParserUtils::getTextForElement(trChild));
-                    }
-                    else if (tdIndex == static_cast<unsigned int>(LiveFootballParser::FieldIndex::CHANNEL))
-                    {
-                        // TODO: need the conversion from Windows-1251 to utf8
-                        streamingInfo.setChannel(ParserUtils::getTextForElement(trChild));
-                    }
-                    else if (tdIndex == static_cast<unsigned int>(LiveFootballParser::FieldIndex::LINK))
-                    {
-                        streamingInfo.setLink(parseTdContainingLink(trChild));
-                    }
+                    streamingInfo.setBitRate(ParserUtils::getTextForElement(tdElement));
+                }
+                else if (tdIndex == static_cast<unsigned int>(LiveFootballParser::FieldIndex::CHANNEL))
+                {
+                    // TODO: need the conversion from Windows-1251 to utf8
+                    streamingInfo.setChannel(ParserUtils::getTextForElement(tdElement));
+                }
+                else if (tdIndex == static_cast<unsigned int>(LiveFootballParser::FieldIndex::LINK))
+                {
+                    streamingInfo.setLink(parseTdContainingLink(tdElement));
                 }
             }
         }
