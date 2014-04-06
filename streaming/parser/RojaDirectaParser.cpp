@@ -13,9 +13,9 @@ using namespace std;
 
 namespace parser
 {
-    const std::string RojaDirectaParser::kContainerDivId("agendadiv");
-    const std::string RojaDirectaParser::kSpanClass("list");
-    const std::string RojaDirectaParser::kTableDivId("taboastreams");
+    const string RojaDirectaParser::kContainerDivId("agendadiv");
+    const string RojaDirectaParser::kSpanClass("list");
+    const string RojaDirectaParser::kTableDivId("taboastreams");
 
     RojaDirectaParser::RojaDirectaParser():
         parseTree_(nullptr, gumboPtrDeleter),
@@ -31,7 +31,7 @@ namespace parser
 
     // The method returns the list of StreamingInfo objects containing the information parsed from the web page
     vector<website::StreamingInfo> RojaDirectaParser::getStreamingLinks(const string& matchPage,
-            const std::string& team)
+            const string& team)
     {
         vector<website::StreamingInfo> streamingInfoContainer;
         parsePage(matchPage);
@@ -41,27 +41,26 @@ namespace parser
                 kContainerDivId);
         if (containerDiv != nullptr)
         {
-            const GumboVector* divChildrenList = &containerDiv->v.element.children;
-            for (unsigned int divChildIndex = 0; divChildIndex < divChildrenList->length; ++divChildIndex)
+            // Looking for a <span> child with class attribute set to list kSpanClass value
+            const GumboNode* spanWithListClass = ParserUtils::getChildWithPredicate(containerDiv, GUMBO_TAG_SPAN,
+                    [](const GumboNode* divChild){ return ParserUtils::getAttribute(divChild, "class").find(kSpanClass) != string::npos; });
+            if (spanWithListClass != nullptr)
             {
-                // Searching a span (with class list) that contains a list of span, one for each match
-                const GumboNode* divChild = static_cast<GumboNode*>(divChildrenList->data[divChildIndex]);
-                if (ParserUtils::isNodeOfTypeAndTag(divChild, GUMBO_TAG_SPAN) &&
-                    ParserUtils::getAttribute(divChild, "class").find(kSpanClass) != string::npos)
+                // Looking for the <span> for the team (it is inside the former <span>)
+                const GumboNode* spanForTeam = ParserUtils::getChildWithPredicate(spanWithListClass, GUMBO_TAG_SPAN,
+                    [this, &team](const GumboNode* spanChild){ return isSpanForTeam(spanChild, team); });
+                if (spanForTeam != nullptr)
                 {
-                    // Now divChild is the span element containing all the spans with the useful information
-                    const GumboVector* spanChildrenList = &divChild->v.element.children;
-                    for (unsigned int spanChildIndex = 0; spanChildIndex < spanChildrenList->length; ++spanChildIndex)
-                    {
-                        // Searching the span with the information for the match of the team
-                        const GumboNode* spanChild = static_cast<GumboNode*>(spanChildrenList->data[spanChildIndex]);
-                        if (ParserUtils::isNodeOfTypeAndTag(spanChild, GUMBO_TAG_SPAN) &&
-                            isSpanForTeam(spanChild, team))
-                        {
-                            parseSpanElement(spanChild, streamingInfoContainer);
-                        }
-                    }
+                    parseSpanElement(spanForTeam, streamingInfoContainer);
                 }
+                else
+                {
+                    cerr << "RojaDirectaParser - unable to find the <span> for team " << team << endl;
+                }
+            }
+            else
+            {
+                cerr << "RojaDirectaParser - unable to find the <span class='" + kSpanClass + "'>"  << endl;
             }
         }
         else
@@ -73,29 +72,24 @@ namespace parser
     }
 
     // The method checks if the span passed as argument contains the info for the match of the team
-    bool RojaDirectaParser::isSpanForTeam(const GumboNode* spanElement, const std::string& team) const
+    bool RojaDirectaParser::isSpanForTeam(const GumboNode* spanElement, const string& team) const
     {
         assert(spanElement != nullptr);
-        const GumboVector* spanChildrenList = &spanElement->v.element.children;
-        // We are searching the div (child of the span) that contains a b element
-        // with the 2 teams of the match
-        for (unsigned int spanChildIndex = 0; spanChildIndex < spanChildrenList->length; ++spanChildIndex)
+        // We are searching the <div> (child of the <span>) that contains a <b> element
+        // with the name of the 2 teams of the match
+        const GumboNode* divElement = ParserUtils::getIthChildOfTag(spanElement, 0, GUMBO_TAG_DIV);
+        if (divElement != nullptr)
         {
-            const GumboNode* spanChild = static_cast<GumboNode*>(spanChildrenList->data[spanChildIndex]);
-            if (ParserUtils::isNodeOfTypeAndTag(spanChild, GUMBO_TAG_DIV))
-            {
-                // Now spanChild is the div: we want to search its b child containing the 2 teams for the match
-                const GumboVector* divChildrenList = &spanChild->v.element.children;
-                for (unsigned int divChildIndex = 0; divChildIndex < divChildrenList->length; ++divChildIndex)
-                {
-                    const GumboNode* divChild = static_cast<GumboNode*>(divChildrenList->data[divChildIndex]);
-                    if (ParserUtils::isNodeOfTypeAndTag(divChild, GUMBO_TAG_B))
-                    {
-                        // Checking if the text of the b element contains the team we want
-                        return ParserUtils::getTextForElement(divChild).find(team) != string::npos;
-                    }
-                }
-            }
+            // We want to search the <b> (child of <div>) containing the 2 teams for the match
+            // The search is performed checking that the text child of <b> contains the name of the team
+            const GumboNode* bChildForTeam = ParserUtils::getChildWithPredicate(divElement, GUMBO_TAG_B,
+                    [&team](const GumboNode* divChild){ return ParserUtils::getTextForElement(divChild).find(team) != string::npos; });
+            // In case the node is not null, we found the <span> for the team
+            return bChildForTeam != nullptr;
+        }
+        else
+        {
+            cerr << "RojaDirectaParser - unable to find the <div> for team " << team << endl;
         }
 
         return false;
@@ -111,34 +105,29 @@ namespace parser
             vector<website::StreamingInfo>& resultContainer) const
     {
         assert(spanElement != nullptr);
-        // Getting the class attribute of the span to use it to build the id for the table
+        // Getting the class attribute of the span to use it to build the id for the <table>
         string classAttribute = ParserUtils::getAttribute(spanElement, "class");
         if (classAttribute != "")
         {
-            // Searching the table (child of the span) by id
+            // Searching the <table> (child of the <span>) by id
             const GumboNode* tableElement = ParserUtils::getElementById(spanElement, GUMBO_TAG_TABLE,
                     kTableDivId + classAttribute);
             if (tableElement != nullptr)
             {
-                const GumboVector* tableChildrenList = &tableElement->v.element.children;
-                for (unsigned int tableChildIndex = 0; tableChildIndex < tableChildrenList->length; ++tableChildIndex)
+                // Getting the <tbody> child
+                const GumboNode* tbodyElement = ParserUtils::getIthChildOfTag(tableElement, 0, GUMBO_TAG_TBODY);
+                if (tbodyElement != nullptr)
                 {
-                    // Searching the tbody
-                    const GumboNode* tableChild = static_cast<GumboNode*>(tableChildrenList->data[tableChildIndex]);
-                    if (ParserUtils::isNodeOfTypeAndTag(tableChild, GUMBO_TAG_TBODY))
+                    // Getting the list of <tr> elements
+                    vector<const GumboNode*> trElementList = ParserUtils::getChildrenOfTag(tbodyElement, GUMBO_TAG_TR);
+                    for (const GumboNode* trElement : trElementList)
                     {
-                        // Now tableChild is the tbody element and we have to parse all the tr children
-                        const GumboVector* tbodyChildrenList = &tableChild->v.element.children;
-                        for (unsigned int tbodyChildIndex = 0; tbodyChildIndex < tbodyChildrenList->length; ++tbodyChildIndex)
-                        {
-                            // Searching the tr elements in order to parse their information
-                            const GumboNode* tbodyChild = static_cast<GumboNode*>(tbodyChildrenList->data[tbodyChildIndex]);
-                            if (ParserUtils::isNodeOfTypeAndTag(tbodyChild, GUMBO_TAG_TR))
-                            {
-                                parseTrElement(tbodyChild);
-                            }
-                        }
+                        parseTrElement(trElement);
                     }
+                }
+                else
+                {
+                    cerr << "RojaDirectaParser - unable to find the tbody" << endl;
                 }
             }
             else
@@ -155,17 +144,13 @@ namespace parser
     void RojaDirectaParser::parseTrElement(const GumboNode* trElement) const
     {
         assert(trElement != nullptr);
-        const GumboVector* trChildrenList = &trElement->v.element.children;
-        for (unsigned int trChildIndex = 0; trChildIndex < trChildrenList->length; ++trChildIndex)
+        vector<const GumboNode*> tdElementList = ParserUtils::getChildrenOfTag(trElement, GUMBO_TAG_TD);
+        for (unsigned int tdIndex = 0; tdIndex < tdElementList.size(); ++tdIndex)
         {
-            // Searching the children td
-            const GumboNode* trChild = static_cast<GumboNode*>(trChildrenList->data[trChildIndex]);
-            if (ParserUtils::isNodeOfTypeAndTag(trChild, GUMBO_TAG_TD))
+            const GumboNode* tdElement = tdElementList[tdIndex];
+            if (tdIndex == static_cast<unsigned int>(RojaDirectaParser::FieldIndex::CHANNEL))
             {
-                if (trChildIndex == static_cast<unsigned int>(RojaDirectaParser::FieldIndex::CHANNEL))
-                {
-                    cout << ParserUtils::getTextForElement(trChild) << endl;
-                }
+                cout << ParserUtils::getTextForElement(tdElement) << endl;
             }
         }
     }

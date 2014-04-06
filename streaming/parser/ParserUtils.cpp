@@ -66,6 +66,7 @@ namespace parser
         return nullptr;
     }
 
+    // The method returns the ith child of an element, taking into account only elements of a specific tag
     const GumboNode* ParserUtils::getIthChildOfTag(const GumboNode* parent, int index, GumboTag elementTag)
     {
         assert(parent != nullptr);

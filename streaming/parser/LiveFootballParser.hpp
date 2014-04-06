@@ -38,14 +38,14 @@ namespace parser
             static const std::string kSpanClassValue;
             static const int kLinkTableIndex;
 
-            const GumboVector* getTrListWithStreamingLinks(const GumboNode* divParentNode) const;
+            std::vector<const GumboNode*> getTrListWithStreamingLinks(const GumboNode* divParentNode) const;
 
             bool isParentOfMatchLink(const GumboNode *node) const;
 
             void parseMatchId(const std::string& linkToMatchPage);
             std::string parseTdContainingLink(const GumboNode* tdElement) const;
             website::StreamingInfo parseTrElementWithStreamingLink(const GumboNode* trElement) const;
-            std::vector<website::StreamingInfo> parseTrListWithStreamingLinks(const GumboVector* trElementList) const;
+            std::vector<website::StreamingInfo> parseTrListWithStreamingLinks(const std::vector<const GumboNode*>& trElementList) const;
             void parsePage(const std::string& htmlPage);
 
             std::string searchLinkForTeamMatch(const GumboNode *node);
