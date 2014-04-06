@@ -103,22 +103,19 @@ namespace parser
         return trVector;
     }
 
-    /// Utility method to check if the node can be the <span> parent of the <a>
-    /// element containing the link for the match
-    /// For example
+    /// Utility method to check if the node can be the <span> parent of the
+    /// <a> element containing the link for the match. For example:
     /// <span class="argr_custom more">
     ///   <a href="http://livefootball.ws/13328-champions-league-galatasaray-chelsea.html"></a>
     /// </span>
     bool LiveFootballParser::isParentOfMatchLink(const GumboNode *node) const
     {
-        if (ParserUtils::isNodeOfTypeAndTag(node, GUMBO_TAG_SPAN))
+        // Using find and not operator== because the class can be composed of
+        // several values separated by spaces
+        if (ParserUtils::isNodeOfTypeAndTag(node, GUMBO_TAG_SPAN) &&
+            ParserUtils::getAttribute(node, "class").find(kSpanClassValue.c_str()) != string::npos)
         {
-            // Using find and not operator== because the class can be composed of several values
-            // separated by spaces
-            if (ParserUtils::getAttribute(node, "class").find(kSpanClassValue.c_str()) != string::npos)
-            {
-                return true;
-            }
+            return true;
         }
 
         return false;
