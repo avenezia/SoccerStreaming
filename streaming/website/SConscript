@@ -4,7 +4,7 @@ env.Append(CPPFLAGS = compilerFlags)
 env.Append(CPPPATH = ["../network"])
 env.Append(CPPPATH = ["../parser"])
 
-sourceFiles = ["LiveFootballHandler.cpp", "StreamingInfo.cpp"]
+sourceFiles = ["LiveFootballHandler.cpp", "RojaDirectaHandler.cpp", "StreamingInfo.cpp"]
 objects = []
 
 for sourceFile in sourceFiles:

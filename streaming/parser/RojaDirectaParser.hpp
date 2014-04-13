@@ -32,6 +32,7 @@ namespace parser
             };
 
             static const std::string kContainerDivId;
+            static const std::string kLinkPrefix;
             static const std::string kSpanClass;
             static const std::string kTableDivId;
 
@@ -39,7 +40,8 @@ namespace parser
             void parsePage(const std::string& htmlPage);
             void parseSpanElement(const GumboNode* spanElement,
                     std::vector<website::StreamingInfo>& resultContainer) const;
-            void parseTrElement(const GumboNode* trElement) const;
+            std::string parseTdWithLink(const GumboNode* tdElement) const;
+            website::StreamingInfo parseTrElement(const GumboNode* trElement) const;
 
             std::unique_ptr<GumboOutput, void(*)(GumboOutput*)> parseTree_;
             std::string teamName_;

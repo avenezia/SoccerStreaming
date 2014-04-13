@@ -6,8 +6,6 @@
 
 #include "LiveFootballParser.hpp"
 #include "StreamingHandler.hpp"
-#include "StreamingInfo.hpp"
-
 
 namespace network{ class HttpHandler; }
 

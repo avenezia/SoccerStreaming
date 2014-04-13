@@ -69,8 +69,13 @@ namespace website
 
     std::ostream& operator<<(std::ostream& o, const StreamingInfo& streamingInfo)
     {
-        o << "Link " << streamingInfo.link_ << ", channel " << streamingInfo.channel_ <<
-                ", bitrate " << streamingInfo.bitRate_ << " ";
+        o << "Link ";
+        o.width(50);
+        o << streamingInfo.link_ << ", channel ";
+        o.width(20);
+        o << streamingInfo.channel_ << ", bitrate ";
+        o.width(5);
+        o << streamingInfo.bitRate_ << " ";
         return o;
     }
 }

@@ -2,8 +2,10 @@
 
 //#include "CurlHttpHandler.hpp"
 //#include "HttpResponse.hpp"
-#include "RojaDirectaParser.hpp"
 #include "LiveFootballHandler.hpp"
+#include "RojaDirectaParser.hpp"
+#include "StreamingInfo.hpp"
+
 
 #include <fstream>
 #include <iostream>
@@ -36,7 +38,11 @@ void test(char *argv[])
     //network::CurlHttpHandler c("http://www.rojadirecta.me/");
     //cout << c.getRequest("/").getBody();
     parser::RojaDirectaParser p;
-    p.getStreamingLinks(openFile(argv[1]), argv[2]);
+    auto v = p.getStreamingLinks(openFile(argv[1]), argv[2]);
+    for (auto& e: v)
+    {
+        cout << e << endl;
+    }
 }
 
 int main(int argc, char *argv[])
