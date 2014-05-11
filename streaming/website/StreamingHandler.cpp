@@ -13,13 +13,11 @@ namespace website
     {
         if (type == StreamingHandlerType::LIVEFOOTBALL)
         {
-            unique_ptr<StreamingHandler> handlerPtr(new LiveFootballHandler("http://livefootball.ws/"));
-            return handlerPtr;
+            return unique_ptr<StreamingHandler>(new LiveFootballHandler("http://livefootball.ws/"));
         }
         else if (type == StreamingHandlerType::ROJADIRECTA)
         {
-            unique_ptr<StreamingHandler> handlerPtr(new RojaDirectaHandler("http://www.rojadirecta.me/"));
-            return handlerPtr;
+            return unique_ptr<StreamingHandler>(new RojaDirectaHandler("http://www.rojadirecta.me/"));
         }
         else
         {
