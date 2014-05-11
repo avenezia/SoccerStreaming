@@ -1,17 +1,18 @@
 #include <curlpp/cURLpp.hpp>
 
+#include <fstream>
+#include <iostream>
+#include <memory>
+using namespace std;
+
 //#include "CurlHttpHandler.hpp"
 //#include "HttpResponse.hpp"
 #include "LiveFootballHandler.hpp"
 #include "RojaDirectaParser.hpp"
+#include "StreamingHandler.hpp"
 #include "StreamingInfo.hpp"
 
-
-#include <fstream>
-#include <iostream>
-using namespace std;
-
-string openFile(const std::string& fileName)
+string openFile(const string& fileName)
 {
     string result;
     string line;
@@ -52,9 +53,16 @@ int main(int argc, char *argv[])
     else if (argc == 2)
     {
         cURLpp::initialize();
-        website::LiveFootballHandler handler("http://livefootball.ws/");
-        auto results = handler.getStreamingLinks(argv[1]);
-        for (auto iter = begin(results); iter != end(results); ++iter)
+        unique_ptr<website::StreamingHandler> liveFootball = website::StreamingHandler::makeStreamingHandler(website::StreamingHandler::StreamingHandlerType::LIVEFOOTBALL);
+        auto liveFootballResults = liveFootball->getStreamingLinks(argv[1]);
+        for (auto iter = begin(liveFootballResults); iter != end(liveFootballResults); ++iter)
+        {
+            cout << *iter << endl;
+        }
+
+        unique_ptr<website::StreamingHandler> rojaDirecta = website::StreamingHandler::makeStreamingHandler(website::StreamingHandler::StreamingHandlerType::ROJADIRECTA);
+        auto rojaDirectaResults = rojaDirecta->getStreamingLinks(argv[1]);
+        for (auto iter = begin(rojaDirectaResults); iter != end(rojaDirectaResults); ++iter)
         {
             cout << *iter << endl;
         }

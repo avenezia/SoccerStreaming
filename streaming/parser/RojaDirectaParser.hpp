@@ -7,6 +7,8 @@
 
 #include "gumbo.h"
 
+#include "HtmlParser.hpp"
+
 namespace website
 {
     class StreamingInfo;
@@ -14,7 +16,7 @@ namespace website
 
 namespace parser
 {
-    class RojaDirectaParser
+    class RojaDirectaParser : public HtmlParser
     {
         public:
             RojaDirectaParser();
@@ -37,13 +39,11 @@ namespace parser
             static const std::string kTableDivId;
 
             bool isSpanForTeam(const GumboNode* spanElement, const std::string& team) const;
-            void parsePage(const std::string& htmlPage);
             void parseSpanElement(const GumboNode* spanElement,
                     std::vector<website::StreamingInfo>& resultContainer) const;
             std::string parseTdWithLink(const GumboNode* tdElement) const;
             website::StreamingInfo parseTrElement(const GumboNode* trElement) const;
 
-            std::unique_ptr<GumboOutput, void(*)(GumboOutput*)> parseTree_;
             std::string teamName_;
     };
 }

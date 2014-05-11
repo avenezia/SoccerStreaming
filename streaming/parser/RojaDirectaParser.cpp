@@ -22,7 +22,6 @@ namespace parser
     const string RojaDirectaParser::kTableDivId("taboastreams");
 
     RojaDirectaParser::RojaDirectaParser():
-        parseTree_(nullptr, gumboPtrDeleter),
         teamName_("")
     {
 
@@ -105,11 +104,6 @@ namespace parser
         }
 
         return false;
-    }
-
-    void RojaDirectaParser::parsePage(const string& htmlPage)
-    {
-        parseTree_.reset(gumbo_parse(htmlPage.c_str()));
     }
 
     // The method is responsible of the parsing of the span containing the info for the match

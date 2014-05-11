@@ -8,6 +8,8 @@
 
 #include "gumbo.h"
 
+#include "HtmlParser.hpp"
+
 namespace website
 {
     class StreamingInfo;
@@ -15,7 +17,7 @@ namespace website
 
 namespace parser
 {
-    class LiveFootballParser
+    class LiveFootballParser : public HtmlParser
     {
         public:
             LiveFootballParser();
@@ -46,12 +48,9 @@ namespace parser
             std::string parseTdContainingLink(const GumboNode* tdElement) const;
             website::StreamingInfo parseTrElementWithStreamingLink(const GumboNode* trElement) const;
             std::vector<website::StreamingInfo> parseTrListWithStreamingLinks(const std::vector<const GumboNode*>& trElementList) const;
-            void parsePage(const std::string& htmlPage);
-
             std::string searchLinkForTeamMatch(const GumboNode *node);
 
             std::string matchId_;
-            std::unique_ptr<GumboOutput, void(*)(GumboOutput*)> parseTree_;
             std::string teamName_;
     };
 }

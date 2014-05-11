@@ -24,7 +24,6 @@ namespace parser
 
     LiveFootballParser::LiveFootballParser():
         matchId_(""),
-        parseTree_(nullptr, gumboPtrDeleter),
         teamName_("")
     {
 
@@ -212,11 +211,6 @@ namespace parser
         }
 
         return streamingLinks;
-    }
-
-    void LiveFootballParser::parsePage(const string& htmlPage)
-    {
-        parseTree_.reset(gumbo_parse(htmlPage.c_str()));
     }
 
     /// The method searches the link to the details of the streaming for a specific team
