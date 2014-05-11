@@ -9,13 +9,16 @@
 #include <string>
 #include <utility>
 #include <vector>
+using namespace std;
 
 #include <curlpp/Infos.hpp>
 #include <curlpp/Options.hpp>
 
 namespace network
 {
-    CurlHttpHandler::CurlHttpHandler(const std::string& hostnameUrl):
+    const string CurlHttpHandler::kHttpBodyStart("<html>");
+
+    CurlHttpHandler::CurlHttpHandler(const string& hostnameUrl):
         hostnameUrl_(hostnameUrl)
     {
 
@@ -26,19 +29,19 @@ namespace network
 
     }
 
-    HttpResponse CurlHttpHandler::getRequest(const std::string& requestUri,
-        const std::vector<std::pair<std::string, std::string>>& headers,
+    HttpResponse CurlHttpHandler::getRequest(const string& requestUri,
+        const vector<pair<string, string>>& headers,
         bool withAbsolutePath)
     {
-        std::list<std::string> headerList;
+        list<string> headerList;
         // Converting the headers in the Curl format taking a list of strings in the form key:value
-        std::transform (headers.begin(), headers.end(), std::back_inserter(headerList),
-            [] (const std::pair<std::string, std::string>& header) { return header.first + ":" + header.second; });
+        transform (headers.begin(), headers.end(), back_inserter(headerList),
+            [] (const pair<string, string>& header) { return header.first + ":" + header.second; });
         curlpp::options::HttpHeader httpHeaders(headerList);
 
         // Curl is performing the copy of the object: allocation on the heap could be used
         // in order to be more efficient
-        std::stringstream responseStream;
+        stringstream responseStream;
         requestHandler_.setOpt(httpHeaders);
         if (!withAbsolutePath)
         {
@@ -51,31 +54,60 @@ namespace network
             // TODO: In this case a check on the domain is performed
             requestHandler_.setOpt(curlpp::options::Url(requestUri));
         }
+
+        // To add the header to the resulting stringstream
+        requestHandler_.setOpt(curlpp::options::Header(true));
         // The response will be written in the stringstream
         requestHandler_.setOpt(curlpp::options::WriteStream(&responseStream));
         requestHandler_.perform();
-
-        // It seems that Curlpp doesn't provide access to response headers: skipping them
+        // Splitting the header and the body from the response stream
+        pair<string, string> headerBodyPair = getHeaderAndBodyFromStream(responseStream.str());
         // Returning the response by value is ok because the Return value optimization or
         // move semantics will be used, avoiding huge copies
-        HttpResponse response(responseStream.str(), curlpp::infos::ResponseCode::get(requestHandler_));
+        HttpResponse response(move(headerBodyPair.second), move(headerBodyPair.first),
+                curlpp::infos::ResponseCode::get(requestHandler_));
         return response;
     }
 
-    HttpResponse CurlHttpHandler::getRequest(const std::string& requestUri,
-        const std::pair<std::string, std::string>& singleHeader,
+    HttpResponse CurlHttpHandler::getRequest(const string& requestUri,
+        const pair<string, string>& singleHeader,
         bool withAbsolutePath)
     {
-        std::vector<std::pair<std::string, std::string>> v;
+        vector<pair<string, string>> v;
         v.push_back(singleHeader);
         return getRequest(requestUri, v, withAbsolutePath);
     }
 
-    HttpResponse CurlHttpHandler::getRequest(const std::string& requestUri,
+    HttpResponse CurlHttpHandler::getRequest(const string& requestUri,
         bool withAbsolutePath)
     {
-        std::vector<std::pair<std::string, std::string>> v;
+        vector<pair<string, string>> v;
         return getRequest(requestUri, v, withAbsolutePath);
+    }
+
+    // The method will separate the header and the body, putting the header as pair.first and the body
+    // as pair.second. In case the separation can't be found, everything is put as body
+    pair<string, string> CurlHttpHandler::getHeaderAndBodyFromStream(const string& streamString) const
+    {
+        pair<string, string> headerBodyPair;
+        // Searching the beginning of the http response body so that we can split the header and the body.
+        // This is done because it seems that curlpp doesn't provide an easy way to access the header.
+        // In any case it should be performed in a more robust way because we are searching only
+        // the lowercase <html> tag, and it wouldn't work in case of uppercase tag.
+        size_t headerBodyIndexSeparator = streamString.find(kHttpBodyStart);
+        if (headerBodyIndexSeparator != string::npos)
+        {
+            headerBodyPair.first = streamString.substr(0, headerBodyIndexSeparator);
+            headerBodyPair.second = streamString.substr(headerBodyIndexSeparator);
+        }
+        else
+        {
+            cerr << "CurlHttpHandler - Unable to find separation between HTTP response header and body" << endl;
+            headerBodyPair.first = "";
+            headerBodyPair.second = streamString;
+        }
+
+        return headerBodyPair;
     }
 }
 

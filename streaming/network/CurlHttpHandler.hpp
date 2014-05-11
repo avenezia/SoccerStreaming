@@ -4,6 +4,7 @@
 #include "HttpHandler.hpp"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <curlpp/Easy.hpp>
@@ -28,6 +29,10 @@ namespace network
                 bool withAbsolutePath = false);
 
         private:
+            static const std::string kHttpBodyStart;
+
+            std::pair<std::string, std::string> getHeaderAndBodyFromStream(const std::string& streamString) const;
+
             std::string hostnameUrl_;
             curlpp::Easy requestHandler_;
     };

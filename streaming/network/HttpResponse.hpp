@@ -10,6 +10,7 @@ namespace network
 		public:
 			HttpResponse(const std::string& body, const std::string& header, short statusCode);
 			HttpResponse(const std::string& body, short statusCode);
+			HttpResponse(std::string&& body, std::string&& header, short statusCode);
 			HttpResponse(HttpResponse&& h);
 			~HttpResponse() = default;
 

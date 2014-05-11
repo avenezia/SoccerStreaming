@@ -1,10 +1,12 @@
 #include "HttpResponse.hpp"
 
+#include <string>
 #include <utility>
+using namespace std;
 
 namespace network
 {
-	HttpResponse::HttpResponse(const std::string& body, const std::string& header, short statusCode):
+	HttpResponse::HttpResponse(const string& body, const string& header, short statusCode):
 			body_(body),
 			header_(header),
 			statusCode_(statusCode)
@@ -12,26 +14,34 @@ namespace network
 
 	}
 
-	HttpResponse::HttpResponse(const std::string& body, short statusCode):
+	HttpResponse::HttpResponse(const string& body, short statusCode):
 			HttpResponse(body, "", statusCode)
 	{
 
 	}
 
-	HttpResponse::HttpResponse(HttpResponse&& h):
-			body_(std::move(h.body_)),
-			header_(std::move(h.header_)),
-			statusCode_(std::move(h.statusCode_))
+	HttpResponse::HttpResponse(string&& body, string&& header, short statusCode):
+	        body_(move(body)),
+	        header_(move(header)),
+	        statusCode_(statusCode)
 	{
 
 	}
 
-	const std::string& HttpResponse::getBody() const
+	HttpResponse::HttpResponse(HttpResponse&& h):
+			body_(move(h.body_)),
+			header_(move(h.header_)),
+			statusCode_(move(h.statusCode_))
+	{
+
+	}
+
+	const string& HttpResponse::getBody() const
 	{
 		return body_;
 	}
 
-	const std::string& HttpResponse::getHeader() const
+	const string& HttpResponse::getHeader() const
 	{
 		return header_;
 	}

@@ -13,7 +13,7 @@ using namespace std;
 
 namespace website
 {    
-    const boost::regex LiveFootballHandler::kAccessCookieRegExp("unddos=[0-9a-z]+");
+    const boost::regex LiveFootballHandler::kAccessCookieRegExp("antid=[a-z0-9]+; path=/");
 
     LiveFootballHandler::LiveFootballHandler(const string& hostName)
         :accessCookie_(""),
@@ -33,10 +33,10 @@ namespace website
     void LiveFootballHandler::setAccessCookieFromHomePage()
     {
         network::HttpResponse homePageResponse = httpHandler_->getRequest("/");
-        if (homePageResponse.getStatusCode() == 200 )
+        if (homePageResponse.getStatusCode() == 307)
         {
             // Parsing the cookie useful to get the real home page
-            accessCookie_ = parseAccessCookie(homePageResponse.getBody());
+            accessCookie_ = parseAccessCookie(homePageResponse.getHeader());
         }
         else
         {
