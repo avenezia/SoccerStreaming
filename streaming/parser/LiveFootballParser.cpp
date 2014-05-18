@@ -7,6 +7,7 @@
 #include <vector>
 using namespace std;
 
+#include <glog/logging.h>
 #include "gumbo.h"
 #include "ParserUtils.hpp"
 #include "StreamingInfo.hpp"
@@ -60,12 +61,12 @@ namespace parser
             }
             else
             {
-                cerr << "LiveFootballParser - unable to find the tr elements containing links" << endl;
+                LOG(WARNING) << "LiveFootballParser - unable to find the tr elements containing links";
             }
         }
         else
         {
-            cerr << "LiveFootballParser - unable to find the container div" << endl;
+            LOG(WARNING) << "LiveFootballParser - unable to find the container div";
         }
 
         return streamingInfoContainer;
@@ -77,7 +78,7 @@ namespace parser
         vector<const GumboNode*> trVector;
         if (divParentNode == nullptr)
         {
-            cerr << "LiveFootballParser - div Node is null" << endl;
+            LOG(WARNING) << "LiveFootballParser - div Node is null";
             return trVector;
         }
 
@@ -96,7 +97,7 @@ namespace parser
         }
         else
         {
-            cerr << "LiveFootballParser - error while searching table with streaming data" << endl;
+            LOG(WARNING) << "error while searching table with streaming data";
         }
 
         return trVector;
@@ -133,7 +134,7 @@ namespace parser
         }
         else
         {
-            cerr << "LiveFootballParser - Unable to parse the match id for " << linkToMatchPage << endl;
+            LOG(WARNING) << "LiveFootballParser - Unable to parse the match id for " << linkToMatchPage;
         }
     }
 
@@ -151,7 +152,7 @@ namespace parser
             }
             else
             {
-                cerr << "LiveFootballParser - The <a> element containing the link is null" << endl;
+                LOG(WARNING) << "LiveFootballParser - The <a> element containing the link is null";
             }
         }
 
@@ -188,7 +189,7 @@ namespace parser
         }
         else
         {
-            cerr << "LiveFootballParser - A <tr> element containing the streaming info is null" << endl;
+            LOG(WARNING) << "LiveFootballParser - A <tr> element containing the streaming info is null";
         }
 
         return streamingInfo;

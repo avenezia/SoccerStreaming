@@ -5,6 +5,8 @@
 #include <memory>
 using namespace std;
 
+#include <glog/logging.h>
+
 //#include "CurlHttpHandler.hpp"
 //#include "HttpResponse.hpp"
 #include "LiveFootballHandler.hpp"
@@ -48,6 +50,8 @@ void test(char *argv[])
 
 int main(int argc, char *argv[])
 {
+    // Initialize Google's logging library.
+    google::InitGoogleLogging(argv[0]);
     if (argc == 3)
         test(argv);
     else if (argc == 2)

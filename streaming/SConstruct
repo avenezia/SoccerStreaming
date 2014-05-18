@@ -15,7 +15,7 @@ Export('compilerFlags')
 env = Environment()
 env.Append(CPPFLAGS = compilerFlags)
 env.Append(CPPPATH = [networkFolder, parserFolder, websiteFolder, "/usr/local/include/"])
-env.Append(LIBS=["boost_regex"])
+env.Append(LIBS=["boost_regex", "glog"])
 env.ParseConfig('pkg-config --libs curlpp')
 env.ParseConfig('pkg-config --libs gumbo')
 
