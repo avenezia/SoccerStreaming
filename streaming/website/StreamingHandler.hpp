@@ -1,6 +1,7 @@
 #ifndef STREAMING_HANDLER_HPP
 #define STREAMING_HANDLER_HPP
 
+#include <exception>
 #include <memory>
 #include <string>
 #include <vector>
@@ -25,6 +26,14 @@ namespace website
 
             virtual std::vector<StreamingInfo> getStreamingLinks(const std::string& teamName) = 0;
             static std::unique_ptr<StreamingHandler> makeStreamingHandler(StreamingHandlerType type);
+    };
+
+    class UnknownStreamingHandler : public std::exception
+    {
+        const char* what() const noexcept override
+        {
+            return "Unknown Handler for streaming";
+        }
     };
 }
 

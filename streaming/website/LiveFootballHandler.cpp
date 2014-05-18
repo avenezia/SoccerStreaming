@@ -110,6 +110,7 @@ namespace website
         return "";
     }
 
+    //TODO: duplicated code with RojaDirectaHandler
     // The method performs an HTTP request: by default withAbsolutePath is set to false
     // so that a relative URI is expected
     string LiveFootballHandler::performHttpRequest(const string& pageUrl,

@@ -38,6 +38,7 @@ namespace parser
             const string& team)
     {
         assert(boost::algorithm::all(team, ::islower));
+        teamName_ = team;
         vector<website::StreamingInfo> streamingInfoContainer;
         parsePage(matchPage);
         // Getting the first container div addressable by id
@@ -53,14 +54,14 @@ namespace parser
             {
                 // Looking for the <span> for the team (it is inside the former <span>)
                 const GumboNode* spanForTeam = ParserUtils::getChildWithPredicate(spanWithListClass, GUMBO_TAG_SPAN,
-                    [this, &team](const GumboNode* spanChild){ return isSpanForTeam(spanChild, team); });
+                    [this](const GumboNode* spanChild){ return isSpanForTeam(spanChild); });
                 if (spanForTeam != nullptr)
                 {
                     parseSpanElement(spanForTeam, streamingInfoContainer);
                 }
                 else
                 {
-                    cerr << "RojaDirectaParser - unable to find the <span> for team " << team << endl;
+                    cerr << "RojaDirectaParser - unable to find the <span> for team " << teamName_ << endl;
                 }
             }
             else
@@ -77,7 +78,7 @@ namespace parser
     }
 
     // The method checks if the span passed as argument contains the info for the match of the team
-    bool RojaDirectaParser::isSpanForTeam(const GumboNode* spanElement, const string& team) const
+    bool RojaDirectaParser::isSpanForTeam(const GumboNode* spanElement) const
     {
         assert(spanElement != nullptr);
         // We are searching the <div> (child of the <span>) that contains a <b> element
@@ -89,18 +90,18 @@ namespace parser
             // The search is performed checking that the text child of <b> contains the name of the team;
             // the text is converted to lowercase to avoid failure in the search due to different case
             const GumboNode* bChildForTeam = ParserUtils::getChildWithPredicate(divElement, GUMBO_TAG_B,
-                    [&team](const GumboNode* divChild)
+                    [this](const GumboNode* divChild)
                     {
                         string teamNames = ParserUtils::getTextForElement(divChild);
                         boost::algorithm::to_lower(teamNames);
-                        return teamNames.find(team) != string::npos;
+                        return teamNames.find(this->teamName_) != string::npos;
                     });
             // In case the node is not null, we found the <span> for the team
             return bChildForTeam != nullptr;
         }
         else
         {
-            cerr << "RojaDirectaParser - unable to find the <div> for team " << team << endl;
+            cerr << "RojaDirectaParser - unable to find the <div> for team " << teamName_ << endl;
         }
 
         return false;

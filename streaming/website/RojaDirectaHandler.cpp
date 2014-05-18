@@ -26,11 +26,12 @@ namespace website
 
     vector<StreamingInfo> RojaDirectaHandler::getStreamingLinks(const string& teamName)
     {
-
-        vector<StreamingInfo> streamingInfoContainer;
+        string homePageContent = performHttpRequest("/");
+        vector<StreamingInfo> streamingInfoContainer = htmlParser_.getStreamingLinks(homePageContent, teamName);
         return streamingInfoContainer;
     }
 
+    //TODO: duplicated code with LiveFootballHandler
     // The method performs an HTTP request: by default withAbsolutePath is set to false
     // so that a relative URI is expected
     string RojaDirectaHandler::performHttpRequest(const string& pageUrl,

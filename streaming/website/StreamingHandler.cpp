@@ -22,7 +22,7 @@ namespace website
         else
         {
             // It should never happen
-            // TODO: add exception
+            throw UnknownStreamingHandler();
         }
 
         return nullptr;

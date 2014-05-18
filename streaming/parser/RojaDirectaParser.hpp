@@ -38,7 +38,7 @@ namespace parser
             static const std::string kSpanClass;
             static const std::string kTableDivId;
 
-            bool isSpanForTeam(const GumboNode* spanElement, const std::string& team) const;
+            bool isSpanForTeam(const GumboNode* spanElement) const;
             void parseSpanElement(const GumboNode* spanElement,
                     std::vector<website::StreamingInfo>& resultContainer) const;
             std::string parseTdWithLink(const GumboNode* tdElement) const;
