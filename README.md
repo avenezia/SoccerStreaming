@@ -6,5 +6,6 @@ to test some new features of C++11 like Rvalue references and move semantics, sm
 - Google gumbo-parser (https://github.com/google/gumbo-parser), to parse the HTML
 - Curlpp (https://code.google.com/p/curlpp/), a C++ wrapper for libcURL used for networking
 - Boost (http://www.boost.org/) for regular expressions (not yet fully implemented in g++), string utilities etc.
+- Glog (https://code.google.com/p/google-glog/) for logging purposes
 
 Scons (http://www.scons.org/) is used as alternative to Make
