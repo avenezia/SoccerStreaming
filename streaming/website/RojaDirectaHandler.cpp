@@ -12,11 +12,9 @@ using namespace std;
 
 namespace website
 {    
-    RojaDirectaHandler::RojaDirectaHandler(const string& hostName):
-         htmlParser_(),
-         httpHandler_(new network::CurlHttpHandler(hostName))
+    RojaDirectaHandler::RojaDirectaHandler(const string& hostName)
     {
-
+        httpHandler_.reset(new network::CurlHttpHandler(hostName));
     }
     
     RojaDirectaHandler::~RojaDirectaHandler()
@@ -26,27 +24,8 @@ namespace website
 
     vector<StreamingInfo> RojaDirectaHandler::getStreamingLinks(const string& teamName)
     {
-        string homePageContent = performHttpRequest("/");
+        string homePageContent = performHttpRequest("/", false);
         vector<StreamingInfo> streamingInfoContainer = htmlParser_.getStreamingLinks(homePageContent, teamName);
         return streamingInfoContainer;
-    }
-
-    //TODO: duplicated code with LiveFootballHandler
-    // The method performs an HTTP request: by default withAbsolutePath is set to false
-    // so that a relative URI is expected
-    string RojaDirectaHandler::performHttpRequest(const string& pageUrl,
-            bool withAbsolutePath) const
-    {
-        network::HttpResponse httpResponse = httpHandler_->getRequest(pageUrl, withAbsolutePath);
-        if (httpResponse.getStatusCode() == 200)
-        {
-            return httpResponse.getBody();
-        }
-        else
-        {
-            cerr << "RojaDirectaHandler - HTTP error while fetching " << pageUrl <<
-                    " , status code " << httpResponse.getStatusCode() << endl;
-            return "";
-        }
     }
 }

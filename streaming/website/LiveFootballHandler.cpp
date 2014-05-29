@@ -6,6 +6,7 @@
 using namespace std;
 
 #include <boost/regex.hpp>
+#include <glog/logging.h>
 
 #include "CurlHttpHandler.hpp"
 #include "HttpResponse.hpp"
@@ -16,11 +17,8 @@ namespace website
     const boost::regex LiveFootballHandler::kAccessCookieRegExp("antid=[a-z0-9]+; path=/");
 
     LiveFootballHandler::LiveFootballHandler(const string& hostName)
-        :accessCookie_(""),
-         htmlParser_(),
-         httpHandler_(new network::CurlHttpHandler(hostName))
     {
-
+        httpHandler_.reset(new network::CurlHttpHandler(hostName));
     }
     
     LiveFootballHandler::~LiveFootballHandler()
@@ -40,9 +38,8 @@ namespace website
         }
         else
         {
-            // TODO: use a better way of logging
-            cerr << "LiveFootballHandler - HTTP error while fetching home, status code " <<
-                    homePageResponse.getStatusCode() << endl;
+            LOG(WARNING) << "LiveFootballHandler - HTTP error while fetching home, status code " <<
+                    homePageResponse.getStatusCode();
         }
     }
 
@@ -50,7 +47,8 @@ namespace website
     // with an absolute path since the link is parsed from the home page
     string LiveFootballHandler::getMatchPage(const string& matchPageLink) const
     {
-        return performHttpRequest(matchPageLink, true);
+        pair<string, string> cookieHeader(make_pair("Cookie", accessCookie_));
+        return performHttpRequest(matchPageLink, true, cookieHeader);
     }
 
     // The method gets the home page of the website, performing an HTTP request
@@ -59,12 +57,12 @@ namespace website
     {
         if (accessCookie_ != "")
         {
-            return performHttpRequest("/");
+            pair<string, string> cookieHeader(make_pair("Cookie", accessCookie_));
+            return performHttpRequest("/", false, cookieHeader);
         }
         else
         {
-            // TODO: use a better way of logging
-            cerr << "LiveFootballHandler: unable to get the access cookie";
+            LOG(WARNING) << "LiveFootballHandler: unable to get the access cookie";
             return "";
         }
     }
@@ -93,7 +91,7 @@ namespace website
         }
         else
         {
-            cerr << "LiveFootballHandler: unable to find the link to the match with " << teamName << endl;
+            LOG(WARNING) << "LiveFootballHandler: unable to find the link to the match with " << teamName;
         }
 
         return streamingInfoContainer;
@@ -108,25 +106,5 @@ namespace website
         }
 
         return "";
-    }
-
-    //TODO: duplicated code with RojaDirectaHandler
-    // The method performs an HTTP request: by default withAbsolutePath is set to false
-    // so that a relative URI is expected
-    string LiveFootballHandler::performHttpRequest(const string& pageUrl,
-            bool withAbsolutePath) const
-    {
-        network::HttpResponse httpResponse = httpHandler_->getRequest(pageUrl,
-                make_pair("Cookie", accessCookie_), withAbsolutePath);
-        if (httpResponse.getStatusCode() == 200)
-        {
-            return httpResponse.getBody();
-        }
-        else
-        {
-            cerr << "LiveFootballHandler - HTTP error while fetching " << pageUrl <<
-                    " , status code " << httpResponse.getStatusCode() << endl;
-            return "";
-        }
     }
 }

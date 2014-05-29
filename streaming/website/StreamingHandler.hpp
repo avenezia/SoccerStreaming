@@ -6,7 +6,8 @@
 #include <string>
 #include <vector>
 
-namespace network{ class HttpHandler; }
+#include "HttpHandler.hpp"
+
 
 namespace website
 {
@@ -26,6 +27,15 @@ namespace website
 
             virtual std::vector<StreamingInfo> getStreamingLinks(const std::string& teamName) = 0;
             static std::unique_ptr<StreamingHandler> makeStreamingHandler(StreamingHandlerType type);
+
+        protected:
+            std::string performHttpRequest(const std::string& pageUrl,
+                    bool withAbsolutePath) const;
+            std::string performHttpRequest(const std::string& pageUrl,
+                    bool withAbsolutePath,
+                    const std::pair<std::string, std::string>& header) const;
+
+            std::unique_ptr<network::HttpHandler> httpHandler_;
     };
 
     class UnknownStreamingHandler : public std::exception

@@ -1,14 +1,15 @@
 #include "LiveFootballParser.hpp"
 
-#include <boost/regex.hpp>
 #include <cstring>
 #include <string>
 #include <utility>
 #include <vector>
 using namespace std;
 
+#include <boost/regex.hpp>
 #include <glog/logging.h>
 #include "gumbo.h"
+
 #include "ParserUtils.hpp"
 #include "StreamingInfo.hpp"
 
@@ -22,18 +23,6 @@ namespace parser
     const string LiveFootballParser::kSpanClassValue("argr_custom");
     // The index of the table containing the links of the streaming for a match
     const int LiveFootballParser::kLinkTableIndex = 2;
-
-    LiveFootballParser::LiveFootballParser():
-        matchId_(""),
-        teamName_("")
-    {
-
-    }
-
-    LiveFootballParser::~LiveFootballParser()
-    {
-
-    }
 
     string LiveFootballParser::getLinkForTeamMatch(const string& indexPage,
             const string& teamName)

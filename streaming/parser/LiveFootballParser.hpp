@@ -20,8 +20,8 @@ namespace parser
     class LiveFootballParser : public HtmlParser
     {
         public:
-            LiveFootballParser();
-            ~LiveFootballParser();
+            LiveFootballParser() = default;
+            ~LiveFootballParser() = default;
 
             std::string getLinkForTeamMatch(const std::string& indexPage,
                     const std::string& teamName);

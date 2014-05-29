@@ -21,12 +21,7 @@ namespace website
             virtual std::vector<StreamingInfo> getStreamingLinks(const std::string& teamName);
 
         private:
-            // TODO: This method is duplicated, it must be deleted
-            std::string performHttpRequest(const std::string& pageUrl,
-                    bool withAbsolutePath = false) const;
-
             parser::RojaDirectaParser htmlParser_;
-            std::unique_ptr<network::HttpHandler> httpHandler_;
     };
 }
 

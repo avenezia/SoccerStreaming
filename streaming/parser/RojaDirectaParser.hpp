@@ -19,8 +19,8 @@ namespace parser
     class RojaDirectaParser : public HtmlParser
     {
         public:
-            RojaDirectaParser();
-            ~RojaDirectaParser();
+            RojaDirectaParser() = default;
+            ~RojaDirectaParser() = default;
 
             std::vector<website::StreamingInfo> getStreamingLinks(const std::string& homePage,
                     const std::string& team);

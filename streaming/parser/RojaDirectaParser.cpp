@@ -1,8 +1,5 @@
 #include "RojaDirectaParser.hpp"
 
-#include <boost/algorithm/string/case_conv.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/regex.hpp>
 #include <cctype>
 #include <cstring>
 #include <string>
@@ -10,7 +7,12 @@
 #include <vector>
 using namespace std;
 
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/regex.hpp>
+#include <glog/logging.h>
 #include "gumbo.h"
+
 #include "ParserUtils.hpp"
 #include "StreamingInfo.hpp"
 
@@ -20,17 +22,6 @@ namespace parser
     const string RojaDirectaParser::kLinkPrefix("goto/");
     const string RojaDirectaParser::kSpanClass("list");
     const string RojaDirectaParser::kTableDivId("taboastreams");
-
-    RojaDirectaParser::RojaDirectaParser():
-        teamName_("")
-    {
-
-    }
-
-    RojaDirectaParser::~RojaDirectaParser()
-    {
-
-    }
 
     // The method returns the list of StreamingInfo objects containing the information parsed from the web page
     // the team name must be lowercase
@@ -61,17 +52,17 @@ namespace parser
                 }
                 else
                 {
-                    cerr << "RojaDirectaParser - unable to find the <span> for team " << teamName_ << endl;
+                    LOG(WARNING) << "RojaDirectaParser - unable to find the <span> for team " << teamName_;
                 }
             }
             else
             {
-                cerr << "RojaDirectaParser - unable to find the <span class='" + kSpanClass + "'>"  << endl;
+                LOG(WARNING) << "RojaDirectaParser - unable to find the <span class='" + kSpanClass + "'>";
             }
         }
         else
         {
-            cerr << "RojaDirectaParser - unable to find the container div" << endl;
+            LOG(WARNING) << "RojaDirectaParser - unable to find the container div";
         }
 
         return streamingInfoContainer;
@@ -101,7 +92,7 @@ namespace parser
         }
         else
         {
-            cerr << "RojaDirectaParser - unable to find the <div> for team " << teamName_ << endl;
+            LOG(WARNING) << "RojaDirectaParser - unable to find the <div> for team " << teamName_;
         }
 
         return false;
@@ -136,17 +127,17 @@ namespace parser
                 }
                 else
                 {
-                    cerr << "RojaDirectaParser - unable to find the tbody" << endl;
+                    LOG(WARNING) << "RojaDirectaParser - unable to find the tbody";
                 }
             }
             else
             {
-                cerr << "RojaDirectaParser - unable to find the table by id" << endl;
+                LOG(WARNING) << "RojaDirectaParser - unable to find the table by id";
             }
         }
         else
         {
-            cerr << "RojaDirectaParser - the class attribute for span element is empty" << endl;
+            LOG(WARNING) << "RojaDirectaParser - the class attribute for span element is empty";
         }
     }
 
@@ -171,12 +162,12 @@ namespace parser
             }
             else
             {
-                cerr << "RojaDirectaParser - unable to find <a> element" << endl;
+                LOG(WARNING) << "RojaDirectaParser - unable to find <a> element";
             }
         }
         else
         {
-            cerr << "RojaDirectaParser - unable to find <b> element" << endl;
+            LOG(WARNING) << "RojaDirectaParser - unable to find <b> element";
         }
 
         return "";
