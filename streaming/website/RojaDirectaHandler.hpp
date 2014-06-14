@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "RojaDirectaParser.hpp"
-#include "StreamingHandler.hpp"
+#include "SiteHandler.hpp"
 
 namespace network{ class HttpHandler; }
 
@@ -12,7 +12,7 @@ namespace website
 {
     class StreamingInfo;
 
-    class RojaDirectaHandler : public StreamingHandler
+    class RojaDirectaHandler : public SiteHandler
     {
         public:
             RojaDirectaHandler(const std::string& hostName);

@@ -13,6 +13,7 @@ using namespace std;
 
 #include <curlpp/Infos.hpp>
 #include <curlpp/Options.hpp>
+#include <glog/logging.h>
 
 namespace network
 {
@@ -102,7 +103,7 @@ namespace network
         }
         else
         {
-            cerr << "CurlHttpHandler - Unable to find separation between HTTP response header and body" << endl;
+            LOG(WARNING) << "Unable to find separation between HTTP response header and body";
             headerBodyPair.first = "";
             headerBodyPair.second = streamString;
         }

@@ -1,5 +1,5 @@
-#ifndef STREAMING_HANDLER_HPP
-#define STREAMING_HANDLER_HPP
+#ifndef SITE_HANDLER_HPP
+#define SITE_HANDLER_HPP
 
 #include <exception>
 #include <memory>
@@ -13,20 +13,20 @@ namespace website
 {
 	class StreamingInfo;
 
-    class StreamingHandler
+    class SiteHandler
     {
         public:
-	        enum class StreamingHandlerType
+	        enum class SiteHandlerType
 	        {
 	            LIVEFOOTBALL,
 	            ROJADIRECTA
 	        };
 
-            StreamingHandler() = default;
-            virtual ~StreamingHandler() = default;
+            SiteHandler() = default;
+            virtual ~SiteHandler() = default;
 
             virtual std::vector<StreamingInfo> getStreamingLinks(const std::string& teamName) = 0;
-            static std::unique_ptr<StreamingHandler> makeStreamingHandler(StreamingHandlerType type);
+            static std::unique_ptr<SiteHandler> makeSiteHandler(SiteHandlerType type);
 
         protected:
             std::string performHttpRequest(const std::string& pageUrl,
@@ -38,7 +38,7 @@ namespace website
             std::unique_ptr<network::HttpHandler> httpHandler_;
     };
 
-    class UnknownStreamingHandler : public std::exception
+    class UnknownSiteHandler : public std::exception
     {
         const char* what() const noexcept override
         {

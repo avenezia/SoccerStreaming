@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "LiveFootballParser.hpp"
-#include "StreamingHandler.hpp"
+#include "SiteHandler.hpp"
 
 namespace network{ class HttpHandler; }
 
@@ -13,7 +13,7 @@ namespace website
 {
     class StreamingInfo;
 
-    class LiveFootballHandler : public StreamingHandler
+    class LiveFootballHandler : public SiteHandler
     {
         public:
             LiveFootballHandler(const std::string& hostName);

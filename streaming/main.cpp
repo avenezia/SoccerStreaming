@@ -11,7 +11,7 @@ using namespace std;
 //#include "HttpResponse.hpp"
 #include "LiveFootballHandler.hpp"
 #include "RojaDirectaParser.hpp"
-#include "StreamingHandler.hpp"
+#include "SiteHandler.hpp"
 #include "StreamingInfo.hpp"
 
 string openFile(const string& fileName)
@@ -57,14 +57,14 @@ int main(int argc, char *argv[])
     else if (argc == 2)
     {
         cURLpp::initialize();
-        unique_ptr<website::StreamingHandler> liveFootball = website::StreamingHandler::makeStreamingHandler(website::StreamingHandler::StreamingHandlerType::LIVEFOOTBALL);
+        unique_ptr<website::SiteHandler> liveFootball = website::SiteHandler::makeSiteHandler(website::SiteHandler::SiteHandlerType::LIVEFOOTBALL);
         auto liveFootballResults = liveFootball->getStreamingLinks(argv[1]);
         for (auto iter = begin(liveFootballResults); iter != end(liveFootballResults); ++iter)
         {
             cout << *iter << endl;
         }
 
-        unique_ptr<website::StreamingHandler> rojaDirecta = website::StreamingHandler::makeStreamingHandler(website::StreamingHandler::StreamingHandlerType::ROJADIRECTA);
+        unique_ptr<website::SiteHandler> rojaDirecta = website::SiteHandler::makeSiteHandler(website::SiteHandler::SiteHandlerType::ROJADIRECTA);
         auto rojaDirectaResults = rojaDirecta->getStreamingLinks(argv[1]);
         for (auto iter = begin(rojaDirectaResults); iter != end(rojaDirectaResults); ++iter)
         {
