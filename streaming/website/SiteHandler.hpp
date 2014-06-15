@@ -19,7 +19,8 @@ namespace website
 	        enum class SiteHandlerType
 	        {
 	            LIVEFOOTBALL,
-	            ROJADIRECTA
+	            ROJADIRECTA,
+	            SITE_HANDLER_COUNT // Not so clean but useful to have the number of handlers
 	        };
 
             SiteHandler() = default;
